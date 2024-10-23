@@ -1,0 +1,14 @@
+/* src/components/Footer.css */
+
+.footer {
+    padding: 1rem;
+    background-color: #f8f8f8;
+    text-align: center;
+  }
+  
+  .social-media a {
+    margin: 0 0.5rem;
+    text-decoration: none;
+    color: #333;
+  }
+  

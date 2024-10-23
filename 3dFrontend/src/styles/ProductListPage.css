@@ -1,0 +1,11 @@
+/* src/pages/ProductListPage.css */
+
+.product-list-page {
+    display: flex;
+  }
+  
+  .product-list-content {
+    flex: 1;
+    padding: 1rem;
+  }
+  

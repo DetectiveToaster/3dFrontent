@@ -1,0 +1,22 @@
+/* src/components/ProductCard.css */
+
+.product-card {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .product-card img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .product-card h4 {
+    margin: 0.5rem 0;
+  }
+  
+  .product-card p {
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
