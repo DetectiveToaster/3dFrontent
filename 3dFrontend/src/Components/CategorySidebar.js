@@ -1,8 +1,8 @@
 // src/components/CategorySidebar.js
 
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
-import './CategorySidebar.css';
+import api from '../Services/api';
+import '../styles/CategorySidebar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CategorySidebar() {

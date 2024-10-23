@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import api from '../services/api';
-import CategorySidebar from '../components/CategorySidebar';
-import ProductGrid from '../components/ProductGrid';
-import './ProductListPage.css';
+import api from '../Services/api';
+import CategorySidebar from '../Components/CategorySidebar';
+import ProductGrid from '../Components/ProductGrid';
+import '../styles/ProductListPage.css';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);

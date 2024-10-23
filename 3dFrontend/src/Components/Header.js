@@ -1,9 +1,9 @@
-// src/components/Header.js
+// src/components/header.js
 
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar';
-import './Header.css';
+import '../styles/Header.css';
 
 function Header() {
   return (

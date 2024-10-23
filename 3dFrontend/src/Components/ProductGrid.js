@@ -2,7 +2,7 @@
 
 import React from 'react';
 import ProductCard from './ProductCard';
-import './ProductGrid.css';
+import '../styles/ProductGrid.css';
 
 function ProductGrid({ products }) {
   return (

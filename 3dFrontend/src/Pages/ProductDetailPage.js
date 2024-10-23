@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../services/api';
-import ThreeDViewer from '../components/ThreeDViewer';
-import './ProductDetailPage.css';
+import api from '../Services/api';
+import ThreeDViewer from '../Components/ThreeDViewer';
+import '../styles/ProductDetailPage.css';
 
 function ProductDetailPage() {
   const { id } = useParams();
