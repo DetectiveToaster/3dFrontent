@@ -1,7 +1,10 @@
 /* src/components/ThreeDViewer.css */
 
 .three-d-viewer {
-    width: 100%;
-    height: 500px;
-  }
-  
+  width: 100%;
+  height: 400px;
+  background: #202020;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 auto 20px auto;
+}

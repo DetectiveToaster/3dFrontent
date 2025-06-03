@@ -9,12 +9,40 @@ import '../styles/ProductDetailPage.css';
 function ProductDetailPage() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [images, setImages] = useState([]);
+  const [modelUrl, setModelUrl] = useState(null);
 
   useEffect(() => {
     api
       .get(`/products/${id}`)
-      .then((response) => setProduct(response.data))
+      .then(async (response) => {
+        setProduct(response.data);
+        // Fetch all image blobs
+        const imgs = [];
+        let modelBlobUrl = null;
+        if (response.data.media && response.data.media.length > 0) {
+          for (const media of response.data.media) {
+            if (media.media_type === "image") {
+              const imgRes = await api.get(`/media/${media.id}`, { responseType: 'blob' });
+              imgs.push(URL.createObjectURL(imgRes.data));
+            }
+            if (media.media_type === "model" && !modelBlobUrl) {
+              const modelRes = await api.get(`/media/${media.id}`, { responseType: 'blob' });
+              modelBlobUrl = URL.createObjectURL(modelRes.data);
+            }
+          }
+        }
+        setImages(imgs);
+        setModelUrl(modelBlobUrl);
+      })
       .catch((error) => console.error('Error fetching product:', error));
+
+    // Clean up blob URLs on unmount
+    return () => {
+      images.forEach(url => URL.revokeObjectURL(url));
+      if (modelUrl) URL.revokeObjectURL(modelUrl);
+    };
+    // eslint-disable-next-line
   }, [id]);
 
   if (!product) return <div>Loading...</div>;
@@ -22,19 +50,30 @@ function ProductDetailPage() {
   return (
     <div className="product-detail-page">
       <div className="product-visual">
-        <ThreeDViewer modelPath={product.modelUrl} />
+        {/* Image gallery (show all) */}
+        {images.length > 0 && (
+          <div className="product-images">
+            {images.map((img, idx) => (
+              <img key={idx} src={img} alt={product.name + ' img' + idx} />
+            ))}
+          </div>
+        )}
+        {/* 3D Viewer */}
+        {modelUrl && (
+          <div className="product-3dviewer">
+            <ThreeDViewer modelUrl={modelUrl} />
+          </div>
+        )}
       </div>
       <div className="product-details">
         <h2>{product.name}</h2>
-        <p className="price">${product.selling_cost.toFixed(2)}</p>
-        <p>{product.description || 'No description available.'}</p>
+        <p className="price">${parseFloat(product.selling_cost).toFixed(2)}</p>
         <ul className="specs">
           <li>Height: {product.height} cm</li>
           <li>Length: {product.length} cm</li>
           <li>Depth: {product.depth} cm</li>
         </ul>
-        {/* Future implementation: Add to Cart button */}
-        {/* <button className="add-to-cart">Add to Cart</button> */}
+        {/* Add to cart button (future) */}
       </div>
     </div>
   );

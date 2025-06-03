@@ -1,17 +1,40 @@
 // src/components/ProductCard.js
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/ProductCard.css';
+import api from '../Services/api';
 
 function ProductCard({ product }) {
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (product.media && product.media.length > 0) {
+      // Find first image-type media
+      const imageMedia = product.media.find(m => m.media_type === 'image');
+      if (imageMedia) {
+        // Fetch image as blob, create object URL
+        api.get(`/media/${imageMedia.id}`, { responseType: 'blob' })
+          .then(res => setImageUrl(URL.createObjectURL(res.data)))
+          .catch(() => setImageUrl('/placeholder.jpg'));
+      } else {
+        setImageUrl('/placeholder.jpg');
+      }
+    } else {
+      setImageUrl('/placeholder.jpg');
+    }
+    // Clean up object URL on unmount
+    return () => { if (imageUrl) URL.revokeObjectURL(imageUrl); };
+    // eslint-disable-next-line
+  }, [product]);
+
   return (
     <div className="product-card">
       <Link to={`/products/${product.id}`}>
-        <img src={product.imageUrl || '/placeholder.jpg'} alt={product.name} />
+        <img src={imageUrl || '/placeholder.jpg'} alt={product.name} />
         <h4>{product.name}</h4>
       </Link>
-      <p>${product.selling_cost.toFixed(2)}</p>
+      <p>${parseFloat(product.selling_cost).toFixed(2)}</p>
     </div>
   );
 }
