@@ -14,12 +14,11 @@ function Header() {
         <Link to="/">YourLogo</Link>
       </div>
       <SearchBar />
-      <nav className="nav-links">
-        <Link to="/products">Products</Link>
-        <Link to="/products">Products</Link>
-        <Link to="/cart">Cart ({cartItems.length})</Link>
-        {/* Future links like Cart, Login can be added here */}
-      </nav>
+        <nav className="nav-links">
+          <Link to="/products">Products</Link>
+          <Link to="/cart">Cart ({cartItems.length})</Link>
+          {/* Future links like Cart, Login can be added here */}
+        </nav>
     </header>
   );
 }
