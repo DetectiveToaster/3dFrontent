@@ -21,6 +21,11 @@ This repository contains a React frontend application located in the `3dFrontend
    ```javascript
    // 3dFrontend/src/Services/Api.js
    const API_BASE_URL = 'http://localhost:8000';
+
+   The frontend reads `REACT_APP_API_URL` to determine the base URL for API
+requests. You can set this variable in a `.env` file or in your environment.
+If omitted, it defaults to `http://localhost:8000`.
    ```
+
 
 The bulk of the source code (components, pages and services) lives inside the `3dFrontend/src` folder.
