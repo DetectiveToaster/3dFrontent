@@ -2,18 +2,17 @@
 
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
-import api from "../Services/api";
+import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
 import "../styles/CheckoutPage.css";
 
 function CheckoutPage(props) {
   const user = props.user || null;
-  const { cartItems, clearCart } = useCart();
+  const { cartItems } = useCart();
   const [form, setForm] = useState({
     email: user?.email || "",
     address: user?.address || "",
   });
   const [status, setStatus] = useState("");
-  const [placingOrder, setPlacingOrder] = useState(false);
 
   const getProduct = (item) => item.product || item;
 
@@ -23,46 +22,10 @@ function CheckoutPage(props) {
     sum + (getProduct(item).selling_cost * item.quantity), 0
   );
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setPlacingOrder(true);
-    try {
-      if (user) {
-        // User order
-        await api.post("/orders/", {
-          user_id: user.id,
-          total_cost: total,
-          status: "pending",
-          products: cartItems.map(i => ({
-            product_id: i.product_id,
-            quantity: i.quantity,
-          })),
-        });
-      } else {
-        // Guest order
-        await api.post("/guest_orders/", {
-          guest_email: form.email,
-          guest_address: form.address,
-          total_cost: total,
-          status: "pending",
-          products: cartItems.map(i => ({
-            product_id: i.product_id,
-            quantity: i.quantity,
-          })),
-        });
-      }
-      setStatus("Order placed successfully!");
-      clearCart();
-    } catch (err) {
-      setStatus("Error placing order. Please try again.");
-    }
-    setPlacingOrder(false);
-  };
-
   return (
     <div className="checkout-page">
       <h2>Checkout</h2>
-      <form onSubmit={handleSubmit}>
+      <form>
         {!user && (
           <>
             <label>
@@ -93,7 +56,13 @@ function CheckoutPage(props) {
           </ul>
           <p><b>Total: ${total.toFixed(2)}</b></p>
         </div>
-        <button type="submit" disabled={placingOrder}>{placingOrder ? "Placing..." : "Place Order"}</button>
+        <PaypalCheckoutButton
+          user={user}
+          form={form}
+          cartItems={cartItems}
+          total={total}
+          onSuccess={() => setStatus("Payment successful!")}
+        />
         {status && <div className="status">{status}</div>}
       </form>
     </div>
