@@ -59,3 +59,16 @@
   display: inline-block;
   margin-top: 12px;
 }
+
+@media (max-width: 600px) {
+  .cart-page {
+    margin: 20px;
+    padding: 16px;
+  }
+
+  .cart-page table {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+}

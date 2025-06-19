@@ -20,7 +20,13 @@
     cursor: pointer;
   }
   
-  .category-sidebar li.active {
+.category-sidebar li.active {
     font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    .category-sidebar {
+      width: 100%;
+    }
   }
   

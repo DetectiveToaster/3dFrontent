@@ -72,6 +72,7 @@
   text-align: center;
 }
 
+
 .payment-method {
   display: flex;
   gap: 20px;
@@ -118,4 +119,12 @@
 .credit-card-form .error {
   color: #b00020;
   font-weight: 500;
+
+  @media (max-width: 600px) {
+  .checkout-page {
+    max-width: 100%;
+    margin: 20px;
+    padding: 20px;
+  }
+  
 }
