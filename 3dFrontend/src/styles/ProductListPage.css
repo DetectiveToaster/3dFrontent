@@ -3,9 +3,21 @@
 .product-list-page {
     display: flex;
   }
-  
+
   .product-list-content {
     flex: 1;
     padding: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .product-list-page {
+      flex-direction: column;
+    }
+
+    /* make sidebar full width on small screens */
+    .product-list-page .category-sidebar {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
   }
   

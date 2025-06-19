@@ -2,17 +2,20 @@
 
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
+import CreditCardCheckoutForm from "../Components/CreditCardCheckoutForm";
 import "../styles/CheckoutPage.css";
 
-function CheckoutPage(props) {
-  const user = props.user || null;
+function CheckoutPage() {
+  const { user } = useAuth();
   const { cartItems } = useCart();
   const [form, setForm] = useState({
     email: user?.email || "",
     address: user?.address || "",
   });
   const [status, setStatus] = useState("");
+  const [method, setMethod] = useState("paypal");
 
   const getProduct = (item) => item.product || item;
 
@@ -56,13 +59,45 @@ function CheckoutPage(props) {
           </ul>
           <p><b>Total: ${total.toFixed(2)}</b></p>
         </div>
-        <PaypalCheckoutButton
-          user={user}
-          form={form}
-          cartItems={cartItems}
-          total={total}
-          onSuccess={() => setStatus("Payment successful!")}
-        />
+        <div className="payment-method">
+          <label>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="paypal"
+              checked={method === "paypal"}
+              onChange={() => setMethod("paypal")}
+            />
+            PayPal
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="card"
+              checked={method === "card"}
+              onChange={() => setMethod("card")}
+            />
+            Credit Card
+          </label>
+        </div>
+        {method === "paypal" ? (
+          <PaypalCheckoutButton
+            user={user}
+            form={form}
+            cartItems={cartItems}
+            total={total}
+            onSuccess={() => setStatus("Payment successful!")}
+          />
+        ) : (
+          <CreditCardCheckoutForm
+            user={user}
+            form={form}
+            cartItems={cartItems}
+            total={total}
+            onSuccess={() => setStatus("Payment successful!")}
+          />
+        )
         {status && <div className="status">{status}</div>}
       </form>
     </div>

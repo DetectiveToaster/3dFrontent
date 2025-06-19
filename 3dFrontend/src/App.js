@@ -6,6 +6,8 @@ import ProductListPage from './Pages/ProductListPage';
 import ProductDetailPage from './Pages/ProductDetailPage';
 import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
+import LoginPage from './Pages/LoginPage';
+import RegisterPage from './Pages/RegisterPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
 import { ToastContainer } from 'react-toastify';
@@ -23,6 +25,8 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
         <Footer />
         <ToastContainer />
