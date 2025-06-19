@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../Services/api";
+import { useAuth } from "./AuthContext";
 
 // Create context
 const CartContext = createContext();
@@ -15,7 +16,8 @@ function getInitialCart() {
   return saved ? JSON.parse(saved) : [];
 }
 
-export function CartProvider({ user, children }) {
+export function CartProvider({ children }) {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState(getInitialCart());
 
   // Sync guest cart with localStorage
