@@ -3,7 +3,8 @@
 .category-sidebar {
     width: 200px;
     padding: 1rem;
-    background-color: #f8f8f8;
+    background-color: var(--color-surface);
+    color: var(--color-text);
   }
   
   .category-sidebar h3 {
