@@ -6,16 +6,19 @@ import api from '../Services/api';
 import ThreeDViewer from '../Components/ThreeDViewer';
 import '../styles/ProductDetailPage.css';
 import { useCart } from '../context/CartContext';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 function ProductDetailPage() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [modelUrl, setModelUrl] = useState(null);
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
 
   useEffect(() => {
+    setLoading(true);
     api
       .get(`/products/${id}`)
       .then(async (response) => {
@@ -38,7 +41,8 @@ function ProductDetailPage() {
         setImages(imgs);
         setModelUrl(modelBlobUrl);
       })
-      .catch((error) => console.error('Error fetching product:', error));
+      .catch((error) => console.error('Error fetching product:', error))
+      .finally(() => setLoading(false));
 
     // Clean up blob URLs on unmount
     return () => {
@@ -48,7 +52,7 @@ function ProductDetailPage() {
     // eslint-disable-next-line
   }, [id]);
 
-  if (!product) return <div>Loading...</div>;
+  if (loading) return <div className="loading"><ClipLoader /></div>;
 
   return (
     <div className="product-detail-page">

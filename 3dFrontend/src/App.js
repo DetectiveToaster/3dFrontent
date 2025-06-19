@@ -8,6 +8,8 @@ import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -23,6 +25,7 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
         </Routes>
         <Footer />
+        <ToastContainer />
       </Router>
     </PayPalScriptProvider>
 

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../Services/api";
+import { toast } from "react-toastify";
 
 // Create context
 const CartContext = createContext();
@@ -45,6 +46,7 @@ export function CartProvider({ user, children }) {
       // Refresh cart from backend
       const res = await api.get("/cart/");
       setCartItems(res.data);
+      toast.success("Added to cart");
     } else {
       // Guest cart (localStorage)
       setCartItems(prev => {
@@ -57,6 +59,7 @@ export function CartProvider({ user, children }) {
           next = [...prev, { product_id: product.id, product, quantity }];
         }
         localStorage.setItem("guest_cart", JSON.stringify(next));
+        toast.success("Added to cart");
         return next;
       });
     }
@@ -70,11 +73,13 @@ export function CartProvider({ user, children }) {
         await api.put(`/cart/${existing.id}`, { quantity });
         const res = await api.get("/cart/");
         setCartItems(res.data);
+        toast.info("Cart updated");
       }
     } else {
       setCartItems(prev => {
         const next = prev.map(i => (i.product_id === product_id ? { ...i, quantity } : i));
         localStorage.setItem("guest_cart", JSON.stringify(next));
+        toast.info("Cart updated");
         return next;
       });
     }
@@ -88,11 +93,13 @@ export function CartProvider({ user, children }) {
         await api.delete(`/cart/${existing.id}`);
         const res = await api.get("/cart/");
         setCartItems(res.data);
+        toast.info("Item removed");
       }
     } else {
       setCartItems(prev => {
         const next = prev.filter(i => i.product_id !== product_id);
         localStorage.setItem("guest_cart", JSON.stringify(next));
+        toast.info("Item removed");
         return next;
       });
     }
@@ -105,6 +112,7 @@ export function CartProvider({ user, children }) {
       localStorage.removeItem("guest_cart");
     }
     // for users, handled after order placed
+    toast.info("Cart cleared");
   };
 
   return (
