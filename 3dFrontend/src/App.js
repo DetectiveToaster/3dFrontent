@@ -10,6 +10,8 @@ import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
         </Routes>
         <Footer />
+        <ToastContainer />
       </Router>
     </PayPalScriptProvider>
 

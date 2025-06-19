@@ -2,6 +2,7 @@ import React from 'react';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import api from '../Services/api';
 import { useCart } from '../context/CartContext';
+import { toast } from 'react-toastify';
 
 function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
   const { clearCart } = useCart();
@@ -29,6 +30,7 @@ function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
     return api.post('/payments/capture-paypal-order', { orderID: data.orderID })
       .then(() => {
         clearCart();
+        toast.success('Payment successful');
         if (onSuccess) onSuccess();
       });
   };
