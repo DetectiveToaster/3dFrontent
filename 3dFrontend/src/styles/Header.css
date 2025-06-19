@@ -5,18 +5,18 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    background-color: #ffffff;
+    background-color: var(--color-background);
   }
   
   .logo a {
     font-size: 1.5rem;
     text-decoration: none;
-    color: #333;
+    color: var(--color-text);
   }
   
   .nav-links a {
     margin-left: 1rem;
     text-decoration: none;
-    color: #333;
+    color: var(--color-text);
   }
   

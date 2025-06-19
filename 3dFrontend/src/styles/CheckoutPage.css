@@ -2,7 +2,7 @@
   max-width: 520px;
   margin: 40px auto;
   padding: 30px 24px;
-  background: #fff;
+  background: var(--color-background);
   border-radius: 18px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
@@ -28,12 +28,12 @@
 .checkout-page input {
   padding: 8px;
   border-radius: 7px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-light);
   margin-top: 6px;
 }
 
 .order-summary {
-  background: #f7f7fa;
+  background: var(--color-background-muted);
   border-radius: 10px;
   padding: 16px;
   margin-top: 10px;
@@ -49,7 +49,7 @@
 }
 
 .checkout-page button[type="submit"] {
-  background: #219c55;
+  background: var(--color-success);
   color: #fff;
   border: none;
   padding: 10px 0;
@@ -62,13 +62,13 @@
 }
 
 .checkout-page button[type="submit"]:hover {
-  background: #17643c;
+  background: var(--color-success-hover);
 }
 
 .status {
   margin-top: 10px;
   font-weight: 500;
-  color: #219c55;
+  color: var(--color-success);
   text-align: center;
 }
 
@@ -95,12 +95,12 @@
 .credit-card-form input {
   padding: 8px;
   border-radius: 7px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-light);
   margin-top: 6px;
 }
 
 .credit-card-form button {
-  background: #219c55;
+  background: var(--color-success);
   color: #fff;
   border: none;
   padding: 10px 0;
@@ -113,18 +113,18 @@
 }
 
 .credit-card-form button:hover {
-  background: #17643c;
+  background: var(--color-success-hover);
 }
 
 .credit-card-form .error {
-  color: #b00020;
+  color: var(--color-error);
   font-weight: 500;
+}
 
-  @media (max-width: 600px) {
+@media (max-width: 600px) {
   .checkout-page {
     max-width: 100%;
     margin: 20px;
     padding: 20px;
   }
-  
 }
