@@ -71,3 +71,11 @@
   color: #219c55;
   text-align: center;
 }
+
+@media (max-width: 600px) {
+  .checkout-page {
+    max-width: 100%;
+    margin: 20px;
+    padding: 20px;
+  }
+}
