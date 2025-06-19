@@ -97,7 +97,7 @@ function CheckoutPage() {
             total={total}
             onSuccess={() => setStatus("Payment successful!")}
           />
-        )
+        )}
         {status && <div className="status">{status}</div>}
       </form>
     </div>
