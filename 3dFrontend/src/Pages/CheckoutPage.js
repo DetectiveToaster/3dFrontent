@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
 import "../styles/CheckoutPage.css";
 
-function CheckoutPage(props) {
-  const user = props.user || null;
+function CheckoutPage() {
+  const { user } = useAuth();
   const { cartItems } = useCart();
   const [form, setForm] = useState({
     email: user?.email || "",
