@@ -27,5 +27,11 @@ requests. You can set this variable in a `.env` file or in your environment.
 If omitted, it defaults to `http://localhost:8000`.
    ```
 
+4. **PayPal Client ID**
+   Set `REACT_APP_PAYPAL_CLIENT_ID` in your environment with your PayPal client
+   ID. The PayPal integration falls back to the sandbox `test` ID if this
+   variable is not provided.
+
 
 The bulk of the source code (components, pages and services) lives inside the `3dFrontend/src` folder.
+

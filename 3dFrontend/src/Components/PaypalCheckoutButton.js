@@ -1,6 +1,6 @@
 import React from 'react';
 import { PayPalButtons } from '@paypal/react-paypal-js';
-import api from '../Services/api';
+import { createPaypalOrder, capturePaypalOrder } from '../Services/paypal';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 
@@ -8,26 +8,12 @@ function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
   const { clearCart } = useCart();
 
   const createOrder = () => {
-    const payload = {
-      total_cost: total,
-      products: cartItems.map(i => ({
-        product_id: i.product_id,
-        quantity: i.quantity,
-      })),
-    };
-    if (user) {
-      payload.user_id = user.id;
-      payload.address = form.address;
-    } else {
-      payload.guest_email = form.email;
-      payload.guest_address = form.address;
-    }
-    return api.post('/payments/create-paypal-order', payload)
-      .then(res => res.data.orderID);
+    return createPaypalOrder(total)
+      .then((data) => data.id);
   };
 
   const onApproveHandler = (data) => {
-    return api.post('/payments/capture-paypal-order', { orderID: data.orderID })
+    return capturePaypalOrder(data.orderID)
       .then(() => {
         clearCart();
         toast.success('Payment successful');
