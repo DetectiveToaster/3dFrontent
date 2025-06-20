@@ -13,10 +13,12 @@ import Footer from './Components/Footer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const paypalClientId = process.env.REACT_APP_PAYPAL_CLIENT_ID || 'test';
+
 
 function App() {
   return (
-    <PayPalScriptProvider options={{ "client-id": "test" }}>
+    <PayPalScriptProvider options={{ "client-id": paypalClientId }}>
       <Router>
         <Header />
         <Routes>
