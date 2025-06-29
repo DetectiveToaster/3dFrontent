@@ -2,7 +2,8 @@
 
 .three-d-viewer {
   width: 100%;
-  height: 400px;
+  max-width: 1600px;
+  height: 1200px;
   background: var(--viewer-background);
   border-radius: 12px;
   overflow: hidden;
@@ -11,7 +12,7 @@
 
 @media (max-width: 600px) {
   .three-d-viewer {
-    height: 300px;
+    height: 600px;
   }
 }
 

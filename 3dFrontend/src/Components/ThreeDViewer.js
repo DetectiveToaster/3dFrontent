@@ -22,7 +22,7 @@ function ThreeDViewer({ modelUrl }) {
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;
   return (
-    <div className="three-d-viewer" style={{ width: "100%", height: "400px" }}>
+    <div className="three-d-viewer" style={{ width: "100%", maxWidth: "1600px", height: "1200px" }}>
       <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
         {/* Bright ambient/directional light */}
         <ambientLight intensity={1.1} />
@@ -30,7 +30,7 @@ function ThreeDViewer({ modelUrl }) {
         <Suspense fallback={<Html center><div>Loading 3D Model...</div></Html>}>
           <Model url={modelUrl} />
         </Suspense>
-        <OrbitControls makeDefault />
+        <OrbitControls makeDefault autoRotate autoRotateSpeed={1} />
         <Axes />
       </Canvas>
     </div>
