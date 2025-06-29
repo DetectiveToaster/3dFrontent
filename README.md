@@ -17,9 +17,9 @@ This repository contains a React frontend application located in the `3dFrontend
    This will run the app in development mode at [http://localhost:3000](http://localhost:3000).
 
 3. **Configure the API URL**
-   The application expects a backend API. Update the `API_BASE_URL` constant in `src/Services/Api.js` if your backend runs on a different address:
+   The application expects a backend API. Update the `API_BASE_URL` constant in `src/Services/api.js` if your backend runs on a different address:
    ```javascript
-   // 3dFrontend/src/Services/Api.js
+   // 3dFrontend/src/Services/api.js
    const API_BASE_URL = 'http://localhost:8000';
 
    The frontend reads `REACT_APP_API_URL` to determine the base URL for API

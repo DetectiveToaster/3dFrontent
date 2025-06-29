@@ -8,6 +8,7 @@ import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
+import NotFoundPage from './Pages/NotFoundPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
 import { ToastContainer } from 'react-toastify';
@@ -29,6 +30,7 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />
         <ToastContainer />

@@ -19,8 +19,6 @@ function Model({ url }) {
 }
 
 function ThreeDViewer({ modelUrl }) {
-  // For debugging: swap modelUrl to a known working public GLB to test
-  modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;
   return (
