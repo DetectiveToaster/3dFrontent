@@ -14,9 +14,9 @@
     flex: 1;
   }
 
-  .product-images {
-    max-width: 100%;
-    margin-bottom: 1rem;
+.product-images {
+    max-width: 400px;
+    margin: 0 auto 1rem auto;
   }
   
   .product-details h2 {
