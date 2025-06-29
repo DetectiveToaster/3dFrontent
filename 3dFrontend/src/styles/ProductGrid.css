@@ -1,8 +1,15 @@
 /* src/components/ProductGrid.css */
 
 .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    grid-gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    gap: 1.5rem;
   }
+}
   
