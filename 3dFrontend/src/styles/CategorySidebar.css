@@ -21,8 +21,11 @@
   }
   
 .category-sidebar li.active {
-    font-weight: bold;
-  }
+  font-weight: bold;
+  background: var(--color-background-muted);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+}
 
   @media (max-width: 768px) {
     .category-sidebar {

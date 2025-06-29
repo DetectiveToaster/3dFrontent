@@ -8,3 +8,10 @@
   overflow: hidden;
   margin: 0 auto 20px auto;
 }
+
+@media (max-width: 600px) {
+  .three-d-viewer {
+    height: 300px;
+  }
+}
+
