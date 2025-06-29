@@ -13,6 +13,11 @@
   .product-details {
     flex: 1;
   }
+
+  .product-images {
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
   
   .product-details h2 {
     margin-top: 0;
