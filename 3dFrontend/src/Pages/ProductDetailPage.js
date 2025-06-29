@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../Services/api';
 import ThreeDViewer from '../Components/ThreeDViewer';
+import ImageCarousel from '../Components/ImageCarousel';
 import '../styles/ProductDetailPage.css';
 import { useCart } from '../context/CartContext';
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -57,12 +58,10 @@ function ProductDetailPage() {
   return (
     <div className="product-detail-page">
       <div className="product-visual">
-        {/* Image gallery (show all) */}
+        {/* Images displayed as a carousel */}
         {images.length > 0 && (
           <div className="product-images">
-            {images.map((img, idx) => (
-              <img key={idx} src={img} alt={product.name + ' img' + idx} />
-            ))}
+            <ImageCarousel images={images} altPrefix={product.name} />
           </div>
         )}
         {/* 3D Viewer */}
