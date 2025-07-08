@@ -8,9 +8,14 @@ import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
+import NewArrivalsPage from './Pages/NewArrivalsPage';
+import CollectionsPage from './Pages/CollectionsPage';
+import AboutPage from './Pages/AboutPage';
+import ContactPage from './Pages/ContactPage';
 import NotFoundPage from './Pages/NotFoundPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
+import SideNav from './Components/SideNav';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,6 +27,7 @@ function App() {
     <PayPalScriptProvider options={{ "client-id": paypalClientId }}>
       <Router>
         <Header />
+        <SideNav />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/products" element={<ProductListPage />} />
@@ -30,6 +36,10 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+          <Route path="/collections" element={<CollectionsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />
