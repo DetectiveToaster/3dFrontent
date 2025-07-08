@@ -70,3 +70,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 This app uses PayPal for payments. Set `REACT_APP_PAYPAL_CLIENT_ID` in a .env file for your PayPal credentials.
+
+### Media caching
+
+Images and 3D models fetched from the API are cached in IndexedDB for 24 hours.
+Cached blobs are reused when available which reduces network requests. The
+cache is automatically invalidated after one day.
