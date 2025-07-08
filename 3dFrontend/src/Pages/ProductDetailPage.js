@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../Services/api';
+import { getMediaBlob } from '../Services/mediaCache';
 import ThreeDViewer from '../Components/ThreeDViewer';
 import ImageCarousel from '../Components/ImageCarousel';
 import '../styles/ProductDetailPage.css';
@@ -30,12 +31,12 @@ function ProductDetailPage() {
         if (response.data.media && response.data.media.length > 0) {
           for (const media of response.data.media) {
             if (media.media_type === "image") {
-              const imgRes = await api.get(`/media/${media.id}`, { responseType: 'blob' });
-              imgs.push(URL.createObjectURL(imgRes.data));
+              const blob = await getMediaBlob(media.id);
+              imgs.push(URL.createObjectURL(blob));
             }
             if (media.media_type === "model" && !modelBlobUrl) {
-              const modelRes = await api.get(`/media/${media.id}`, { responseType: 'blob' });
-              modelBlobUrl = URL.createObjectURL(modelRes.data);
+              const blob = await getMediaBlob(media.id);
+              modelBlobUrl = URL.createObjectURL(blob);
             }
           }
         }

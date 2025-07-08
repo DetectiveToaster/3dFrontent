@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/ProductCard.css';
-import api from '../Services/api';
+import { getMediaBlob } from '../Services/mediaCache';
 
 function ProductCard({ product }) {
   const [imageUrl, setImageUrl] = useState(null);
@@ -13,9 +13,9 @@ function ProductCard({ product }) {
       // Find first image-type media
       const imageMedia = product.media.find(m => m.media_type === 'image');
       if (imageMedia) {
-        // Fetch image as blob, create object URL
-        api.get(`/media/${imageMedia.id}`, { responseType: 'blob' })
-          .then(res => setImageUrl(URL.createObjectURL(res.data)))
+        // Fetch image with caching
+        getMediaBlob(imageMedia.id)
+          .then(blob => setImageUrl(URL.createObjectURL(blob)))
           .catch(() => setImageUrl('/placeholder.jpg'));
       } else {
         setImageUrl('/placeholder.jpg');
