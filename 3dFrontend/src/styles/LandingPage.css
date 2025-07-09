@@ -31,5 +31,16 @@
 .featured-model .three-d-viewer {
   height: 500px;
   max-width: 600px;
-  margin: 0 auto;
-}  
+  margin: 0 auto;}
+
+.additional-showcases {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.additional-showcases .three-d-viewer {
+  height: 167px;
+  max-width: 200px;
+}
