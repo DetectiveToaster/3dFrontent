@@ -20,6 +20,16 @@ function LandingPage() {
       <section className="featured-model">
         <h2>Featured 3D Model</h2>
         <ThreeDViewer modelUrl={modelUrl} />
+        <div className="additional-showcases">
+          <ThreeDViewer
+            modelUrl={modelUrl}
+            style={{ maxWidth: "200px", height: "167px" }}
+          />
+          <ThreeDViewer
+            modelUrl={modelUrl}
+            style={{ maxWidth: "200px", height: "167px" }}
+          />
+        </div>
         <p>Experience our latest creation from every angle.</p>
         <Link to="/products" className="cta-button">
           Explore Models

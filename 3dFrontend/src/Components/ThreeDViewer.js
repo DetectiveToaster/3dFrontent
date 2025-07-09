@@ -40,11 +40,17 @@ function Model({ url }) {
   return <primitive object={scene} />;
 }
 
-function ThreeDViewer({ modelUrl }) {
+function ThreeDViewer({ modelUrl, style = {} }) {
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;
+  const viewerStyle = {
+    width: "100%",
+    maxWidth: "1600px",
+    height: "1200px",
+    ...style,
+  };
   return (
-    <div className="three-d-viewer" style={{ width: "100%", maxWidth: "1600px", height: "1200px" }}>
+    <div className="three-d-viewer" style={viewerStyle}>
       <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
         {/* Bright ambient/directional light */}
         <ambientLight intensity={1.1} />
