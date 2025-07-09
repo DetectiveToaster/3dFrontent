@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import api from '../Services/api';
-import CategorySidebar from '../Components/CategorySidebar';
 import ProductGrid from '../Components/ProductGrid';
 import '../styles/ProductListPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -34,7 +33,6 @@ function ProductListPage() {
 
   return (
     <div className="product-list-page">
-      <CategorySidebar />
       <div className="product-list-content">
         {loading ? <ClipLoader /> : <ProductGrid products={products} />}
       </div>

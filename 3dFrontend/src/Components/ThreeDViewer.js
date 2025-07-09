@@ -27,10 +27,6 @@ class ModelErrorBoundary extends React.Component {
 }
 
 
-// Helper for debugging: axes at origin
-function Axes() {
-  return <axesHelper args={[5]} />;
-}
 
 function Model({ url }) {
   // Log loading
@@ -60,8 +56,7 @@ function ThreeDViewer({ modelUrl, style = {} }) {
               <Model url={modelUrl} />
             </Suspense>
           </ModelErrorBoundary>
-        <OrbitControls makeDefault autoRotate autoRotateSpeed={1} />
-        <Axes />
+        <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} />
       </Canvas>
     </div>
   );

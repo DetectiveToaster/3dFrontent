@@ -11,6 +11,8 @@ import RegisterPage from './Pages/RegisterPage';
 import NotFoundPage from './Pages/NotFoundPage';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
+import CategorySidebar from './Components/CategorySidebar';
+import './styles/CategoryNav.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,6 +24,9 @@ function App() {
     <PayPalScriptProvider options={{ "client-id": paypalClientId }}>
       <Router>
         <Header />
+        <div className="category-nav">
+          <CategorySidebar />
+        </div>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/products" element={<ProductListPage />} />
