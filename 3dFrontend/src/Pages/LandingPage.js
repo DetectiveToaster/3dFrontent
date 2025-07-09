@@ -18,16 +18,19 @@ function LandingPage() {
         </Link>
       </div>
       <section className="featured-model">
-        <h2>Featured 3D Model</h2>
-        <ThreeDViewer modelUrl={modelUrl} />
-        <div className="additional-showcases">
+        <h2>Featured 3D Models</h2>
+        <div className="showcases">
           <ThreeDViewer
             modelUrl={modelUrl}
-            style={{ maxWidth: "200px", height: "167px" }}
+            style={{ maxWidth: "400px", height: "333px" }}
           />
           <ThreeDViewer
             modelUrl={modelUrl}
-            style={{ maxWidth: "200px", height: "167px" }}
+            style={{ maxWidth: "400px", height: "333px" }}
+          />
+          <ThreeDViewer
+            modelUrl={modelUrl}
+            style={{ maxWidth: "400px", height: "333px" }}
           />
         </div>
         <p>Experience our latest creation from every angle.</p>

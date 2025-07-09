@@ -28,19 +28,15 @@
   margin: 1rem 0;
 }
 
-.featured-model .three-d-viewer {
-  height: 500px;
-  max-width: 600px;
-  margin: 0 auto;}
-
-.additional-showcases {
+/* Containers for the row of showcases displayed on the landing page */
+.showcases {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.additional-showcases .three-d-viewer {
-  height: 167px;
-  max-width: 200px;
+.showcases .three-d-viewer {
+  height: 333px;
+  max-width: 400px;
 }
