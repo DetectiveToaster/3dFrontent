@@ -4,6 +4,28 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import '../styles/ThreeDViewer.css';
+class ModelErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.warn("ThreeDViewer: failed to load model", this.props.modelUrl, error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
 
 // Helper for debugging: axes at origin
 function Axes() {
@@ -27,9 +49,11 @@ function ThreeDViewer({ modelUrl }) {
         {/* Bright ambient/directional light */}
         <ambientLight intensity={1.1} />
         <directionalLight intensity={2} position={[0, 10, 10]} />
-        <Suspense fallback={<Html center><div>Loading 3D Model...</div></Html>}>
-          <Model url={modelUrl} />
-        </Suspense>
+          <ModelErrorBoundary modelUrl={modelUrl} fallback={<Html center><div className="error">Failed to load 3D model.</div></Html>}>
+            <Suspense fallback={<Html center><div>Loading 3D Model...</div></Html>}>
+              <Model url={modelUrl} />
+            </Suspense>
+          </ModelErrorBoundary>
         <OrbitControls makeDefault autoRotate autoRotateSpeed={1} />
         <Axes />
       </Canvas>
