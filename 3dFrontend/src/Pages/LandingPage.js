@@ -22,15 +22,15 @@ function LandingPage() {
         <div className="showcases">
           <ThreeDViewer
             modelUrl={modelUrl}
-            style={{ maxWidth: "400px", height: "333px" }}
+            style={{ maxWidth: "600px", height: "500px" }}
           />
           <ThreeDViewer
             modelUrl={modelUrl}
-            style={{ maxWidth: "400px", height: "333px" }}
+            style={{ maxWidth: "600px", height: "500px" }}
           />
           <ThreeDViewer
             modelUrl={modelUrl}
-            style={{ maxWidth: "400px", height: "333px" }}
+            style={{ maxWidth: "600px", height: "500px" }}
           />
         </div>
         <p>Experience our latest creation from every angle.</p>

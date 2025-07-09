@@ -1,23 +1,15 @@
 /* src/pages/ProductListPage.css */
 
 .product-list-page {
-    display: flex;
-  }
+  padding: 1rem;
+}
 
   .product-list-content {
-    flex: 1;
     padding: 1rem;
   }
 
   @media (max-width: 768px) {
     .product-list-page {
-      flex-direction: column;
+      padding: 0.5rem;
     }
-
-    /* make sidebar full width on small screens */
-    .product-list-page .category-sidebar {
-      width: 100%;
-      margin-bottom: 1rem;
-    }
-  }
-  
+  }  
