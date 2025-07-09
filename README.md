@@ -15,6 +15,10 @@ This repository contains a React frontend application located in the `3dFrontend
    npm start
    ```
    This will run the app in development mode at [http://localhost:3000](http://localhost:3000).
+   Using `npm start` (or any web server) is required so React Router can
+   handle direct links such as `/products` or `/new-arrivals`. Opening
+   `public/index.html` directly in the browser may bypass the router and cause
+   these links to break.
 
 3. **Configure the API URL**
    The application expects a backend API. Update the `API_BASE_URL` constant in `src/Services/api.js` if your backend runs on a different address:
