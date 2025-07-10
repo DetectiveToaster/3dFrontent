@@ -14,15 +14,14 @@ function SearchBar() {
   };
 
   return (
-    <form className="search-bar" onSubmit={handleSubmit}>
-      <label htmlFor="searchInput">Search products:</label>
-      <input
-        id="searchInput"
-        type="text"
-        placeholder="Search products..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <form className="search-bar" onSubmit={handleSubmit}>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       <button type="submit">Search</button>
     </form>
   );

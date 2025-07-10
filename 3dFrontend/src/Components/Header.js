@@ -1,6 +1,6 @@
 // src/components/header.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import '../styles/Header.css';
@@ -10,19 +10,28 @@ import { useAuth } from '../context/AuthContext';
 function Header() {
     const { cartItems } = useCart();
     const { user, logout } = useAuth();
+    const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="header">
       <div className="logo">
         <Link to="/">YourLogo</Link>
       </div>
       <SearchBar />
-        <nav className="nav-links" aria-label="Main navigation">
+      <button
+        className="menu-toggle"
+        onClick={() => setMenuOpen((prev) => !prev)}
+        aria-label="Toggle navigation menu"
+      >
+        \u2630
+      </button>
+        <nav className={`nav-links${menuOpen ? ' open' : ''}`} aria-label="Main navigation">
           <ul>
             <li>
-              <Link to="/products">Products</Link>
+              <Link to="/products" onClick={() => setMenuOpen(false)}>Products</Link>
             </li>
             <li>
-              <Link to="/cart">Cart ({cartItems.length})</Link>
+              <Link to="/cart" onClick={() => setMenuOpen(false)}>Cart ({cartItems.length})</Link>
             </li>
             {user ? (
               <>
@@ -30,16 +39,16 @@ function Header() {
                   <span>Hi, {user.email}</span>
                 </li>
                 <li>
-                  <button onClick={logout}>Logout</button>
+                  <button onClick={() => { setMenuOpen(false); logout(); }}>Logout</button>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  <Link to="/login">Login</Link>
+                    <Link to="/login" onClick={() => setMenuOpen(false)}>Login</Link>
                 </li>
                 <li>
-                  <Link to="/register">Register</Link>
+                    <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
                 </li>
               </>
             )}
