@@ -23,14 +23,17 @@ function LandingPage() {
           <ThreeDViewer
             modelUrl={modelUrl}
             style={{ maxWidth: "600px", height: "500px" }}
+            alt="Featured 3D model"
           />
           <ThreeDViewer
             modelUrl={modelUrl}
             style={{ maxWidth: "600px", height: "500px" }}
+            alt="Featured 3D model"
           />
           <ThreeDViewer
             modelUrl={modelUrl}
             style={{ maxWidth: "600px", height: "500px" }}
+            alt="Featured 3D model"
           />
         </div>
         <p>Experience our latest creation from every angle.</p>
