@@ -68,7 +68,7 @@ function ProductDetailPage() {
         {/* 3D Viewer */}
         {modelUrl && (
           <div className="product-3dviewer">
-            <ThreeDViewer modelUrl={modelUrl} />
+            <ThreeDViewer modelUrl={modelUrl} alt={`3D model of ${product.name}`} />
           </div>
         )}
       </div>

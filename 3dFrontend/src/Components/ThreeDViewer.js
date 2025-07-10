@@ -36,7 +36,7 @@ function Model({ url }) {
   return <primitive object={scene} />;
 }
 
-function ThreeDViewer({ modelUrl, style = {} }) {
+function ThreeDViewer({ modelUrl, style = {}, alt }) {
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;
   const viewerStyle = {
@@ -45,8 +45,9 @@ function ThreeDViewer({ modelUrl, style = {} }) {
     height: "1200px",
     ...style,
   };
+  const ariaLabel = alt || '3D model viewer';
   return (
-    <div className="three-d-viewer" style={viewerStyle}>
+    <div className="three-d-viewer" style={viewerStyle} role="img" aria-label={ariaLabel}>
       <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
         {/* Bright ambient/directional light */}
         <ambientLight intensity={1.1} />
@@ -58,6 +59,7 @@ function ThreeDViewer({ modelUrl, style = {} }) {
           </ModelErrorBoundary>
         <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} />
       </Canvas>
+      {alt && <span className="visually-hidden">{alt}</span>}
     </div>
   );
 }
