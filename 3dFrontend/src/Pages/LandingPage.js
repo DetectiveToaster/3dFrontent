@@ -1,6 +1,7 @@
 // src/pages/LandingPage.js
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import ThreeDViewer from '../Components/ThreeDViewer';
 import '../styles/LandingPage.css';
@@ -10,6 +11,13 @@ function LandingPage() {
     "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
   return (
     <div className="landing-page">
+      <Helmet>
+        <title>Home - 3D Figures Store</title>
+        <meta
+          name="description"
+          content="Discover our collection of amazing 3D printed figures."
+        />
+      </Helmet>
       <div className="hero">
         <h1>Welcome to Our 3D Figures Store</h1>
         <p>Discover our collection of amazing 3D printed figures.</p>
