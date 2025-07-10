@@ -33,19 +33,32 @@ function CategorySidebar() {
     <aside className="category-sidebar">
       <h3>Categories</h3>
       <ul>
-        <li
-          className={!selectedCategory ? 'active' : ''}
-          onClick={() => handleCategoryClick(null)}
-        >
-          All
+        <li className={!selectedCategory ? 'active' : ''}>
+          <button
+            type="button"
+            onClick={() => handleCategoryClick(null)}
+            onKeyDown={(e) =>
+              (e.key === 'Enter' || e.key === ' ') && handleCategoryClick(null)
+            }
+          >
+            All
+          </button>
         </li>
         {categories.map((category) => (
           <li
             key={category.id}
             className={selectedCategory === category.id.toString() ? 'active' : ''}
-            onClick={() => handleCategoryClick(category.id)}
           >
-            {category.name}
+            <button
+              type="button"
+              onClick={() => handleCategoryClick(category.id)}
+              onKeyDown={(e) =>
+                (e.key === 'Enter' || e.key === ' ') &&
+                handleCategoryClick(category.id)
+              }
+            >
+              {category.name}
+            </button>
           </li>
         ))}
       </ul>
