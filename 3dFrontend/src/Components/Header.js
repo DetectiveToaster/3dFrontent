@@ -16,20 +16,34 @@ function Header() {
         <Link to="/">YourLogo</Link>
       </div>
       <SearchBar />
-        <nav className="nav-links">
-          <Link to="/products">Products</Link>
-          <Link to="/cart">Cart ({cartItems.length})</Link>
-          {user ? (
-            <>
-              <span className="user-greet">Hi, {user.email}</span>
-              <button onClick={logout}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
-            </>
-          )}
+        <nav className="nav-links" aria-label="Main navigation">
+          <ul>
+            <li>
+              <Link to="/products">Products</Link>
+            </li>
+            <li>
+              <Link to="/cart">Cart ({cartItems.length})</Link>
+            </li>
+            {user ? (
+              <>
+                <li className="user-greet">
+                  <span>Hi, {user.email}</span>
+                </li>
+                <li>
+                  <button onClick={logout}>Logout</button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/login">Login</Link>
+                </li>
+                <li>
+                  <Link to="/register">Register</Link>
+                </li>
+              </>
+            )}
+          </ul>
         </nav>
     </header>
   );
