@@ -23,7 +23,7 @@ function ImageCarousel({ images, altPrefix }) {
           ‹
         </button>
       )}
-      <img src={images[index]} alt={`${altPrefix} ${index + 1}`} />
+      <img loading="lazy" src={images[index]} alt={`${altPrefix} ${index + 1}`} />
       {images.length > 1 && (
         <button className="next" onClick={next} aria-label="Next image">
           ›

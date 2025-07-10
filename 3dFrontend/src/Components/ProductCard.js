@@ -31,7 +31,7 @@ function ProductCard({ product }) {
   return (
     <div className="product-card">
       <Link to={`/products/${product.id}`}>
-        <img src={imageUrl || '/placeholder.jpg'} alt={product.name} />
+        <img loading="lazy" src={imageUrl || '/placeholder.jpg'} alt={product.name} />
         <h4>{product.name}</h4>
       </Link>
       <p>${parseFloat(product.selling_cost).toFixed(2)}</p>
