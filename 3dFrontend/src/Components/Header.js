@@ -6,11 +6,13 @@ import SearchBar from './SearchBar';
 import '../styles/Header.css';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 function Header() {
     const { cartItems } = useCart();
     const { user, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const { toggleTheme, theme } = useTheme();
 
   return (
     <header className="header">
@@ -54,7 +56,13 @@ function Header() {
             )}
           </ul>
         </nav>
-    </header>
+        <button
+          className="theme-toggle"
+          onClick={() => { toggleTheme(); setMenuOpen(false); }}
+        >
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </header>
   );
 }
 
