@@ -28,7 +28,8 @@
     cursor: pointer;
     width: 100%;
     text-align: left;
-  }
+    color: var(--color-text);
+}
   
 .category-sidebar li.active {
   font-weight: bold;
