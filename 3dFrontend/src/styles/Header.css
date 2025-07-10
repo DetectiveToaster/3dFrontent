@@ -68,4 +68,17 @@
     margin: 0.5rem 0;
   }
 }
+
+.theme-toggle {
+  margin-left: 1rem;
+  border: 1px solid var(--color-border);
+  background: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.theme-toggle:hover {
+  background-color: var(--color-surface);
+}
   

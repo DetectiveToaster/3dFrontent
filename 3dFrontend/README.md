@@ -76,3 +76,8 @@ This app uses PayPal for payments. Set `REACT_APP_PAYPAL_CLIENT_ID` in a .env fi
 Images and 3D models fetched from the API are cached in IndexedDB for 24 hours.
 Cached blobs are reused when available which reduces network requests. The
 cache is automatically invalidated after one day.
+
+### Theme toggle
+
+Click the **Dark Mode** button in the header to switch between light and dark
+themes. The preference is saved in `localStorage` and persists across visits.

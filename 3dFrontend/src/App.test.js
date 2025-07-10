@@ -3,6 +3,7 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Mock CSS from react-toastify to avoid Jest errors
 jest.mock('react-toastify/dist/ReactToastify.css', () => {});
@@ -15,11 +16,13 @@ jest.mock('./Components/ThreeDViewer', () => () => (
 test('displays landing page heading', () => {
   render(
     <HelmetProvider>
-      <AuthProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </HelmetProvider>
   );
   const heading = screen.getByRole('heading', {
