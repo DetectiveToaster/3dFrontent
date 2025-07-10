@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from 'react-helmet-async';
 import { useCart } from "../context/CartContext";
 import "../styles/CartPage.css";
 
@@ -17,6 +18,10 @@ function CartPage() {
 
   return (
     <div className="cart-page">
+      <Helmet>
+        <title>Your Cart - 3D Figures Store</title>
+        <meta name="description" content="View and manage items in your shopping cart." />
+      </Helmet>
       <h2>Your Cart</h2>
       {cartItems.length === 0 ? (
         <p>Your cart is empty.</p>

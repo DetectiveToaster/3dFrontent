@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../Services/api';
 import ProductGrid from '../Components/ProductGrid';
 import '../styles/ProductListPage.css';
@@ -33,6 +34,13 @@ function ProductListPage() {
 
   return (
     <div className="product-list-page">
+      <Helmet>
+        <title>Products - 3D Figures Store</title>
+        <meta
+          name="description"
+          content="Browse our selection of 3D printed figures."
+        />
+      </Helmet>
       <div className="product-list-content">
         {loading ? <ClipLoader /> : <ProductGrid products={products} />}
       </div>

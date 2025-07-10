@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import '../styles/AuthPage.css';
 
@@ -26,6 +27,10 @@ function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <Helmet>
+        <title>Register - 3D Figures Store</title>
+        <meta name="description" content="Create an account to purchase 3D figures." />
+      </Helmet>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
         <label>

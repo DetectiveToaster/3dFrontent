@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { Helmet } from 'react-helmet-async';
 import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
 import CreditCardCheckoutForm from "../Components/CreditCardCheckoutForm";
 import "../styles/CheckoutPage.css";
@@ -27,6 +28,10 @@ function CheckoutPage() {
 
   return (
     <div className="checkout-page">
+      <Helmet>
+        <title>Checkout - 3D Figures Store</title>
+        <meta name="description" content="Complete your purchase securely." />
+      </Helmet>
       <h2>Checkout</h2>
       <form>
         {!user && (

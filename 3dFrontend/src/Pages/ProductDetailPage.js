@@ -1,6 +1,7 @@
 // src/pages/ProductDetailPage.js
 
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import api from '../Services/api';
 import { getMediaBlob } from '../Services/mediaCache';
@@ -58,6 +59,13 @@ function ProductDetailPage() {
 
   return (
     <div className="product-detail-page">
+      <Helmet>
+        <title>{product ? `${product.name} - 3D Figures Store` : 'Product Details - 3D Figures Store'}</title>
+        <meta
+          name="description"
+          content={product ? `Purchase ${product.name} and explore its features in detail.` : 'Detailed view of our product.'}
+        />
+      </Helmet>
       <div className="product-visual">
         {/* Images displayed as a carousel */}
         {images.length > 0 && (
