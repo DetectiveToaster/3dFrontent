@@ -1,6 +1,6 @@
 // src/components/ThreeDViewer.js
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import '../styles/ThreeDViewer.css';
@@ -31,7 +31,9 @@ class ModelErrorBoundary extends React.Component {
 function Model({ url }) {
   // Log loading
   console.log("ThreeDViewer: loading model from", url);
-  const { scene } = useGLTF(url, true); // true = useDraco (if model is compressed)
+  const gltf = useGLTF(url, true); // true = useDraco (if model is compressed)
+  const scene = useMemo(() => gltf.scene.clone(), [gltf.scene]);
+  useEffect(() => () => scene.traverse((obj) => obj.dispose?.()), [scene]);
   console.log("ThreeDViewer: loaded model scene", scene);
   return <primitive object={scene} />;
 }
@@ -62,6 +64,10 @@ function ThreeDViewer({ modelUrl, style = {}, alt }) {
       {alt && <span className="visually-hidden">{alt}</span>}
     </div>
   );
+}
+
+export function preloadModel(url) {
+  return useGLTF.preload(url);
 }
 
 export default ThreeDViewer;
