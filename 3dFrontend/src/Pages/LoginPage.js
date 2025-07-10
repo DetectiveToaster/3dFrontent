@@ -30,6 +30,7 @@ function LoginPage() {
       <Helmet>
         <title>Login - 3D Figures Store</title>
         <meta name="description" content="Access your account to manage orders and purchases." />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>

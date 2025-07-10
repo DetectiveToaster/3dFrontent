@@ -21,6 +21,7 @@ function CartPage() {
       <Helmet>
         <title>Your Cart - 3D Figures Store</title>
         <meta name="description" content="View and manage items in your shopping cart." />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <h2>Your Cart</h2>
       {cartItems.length === 0 ? (

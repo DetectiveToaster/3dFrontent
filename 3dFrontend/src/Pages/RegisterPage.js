@@ -30,6 +30,7 @@ function RegisterPage() {
       <Helmet>
         <title>Register - 3D Figures Store</title>
         <meta name="description" content="Create an account to purchase 3D figures." />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>

@@ -17,6 +17,7 @@ function LandingPage() {
           name="description"
           content="Discover our collection of amazing 3D printed figures."
         />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <div className="hero">
         <h1>Welcome to Our 3D Figures Store</h1>

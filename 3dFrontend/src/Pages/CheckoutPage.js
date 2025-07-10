@@ -31,6 +31,7 @@ function CheckoutPage() {
       <Helmet>
         <title>Checkout - 3D Figures Store</title>
         <meta name="description" content="Complete your purchase securely." />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <h2>Checkout</h2>
       <form>
