@@ -15,7 +15,9 @@ function SearchBar() {
 
   return (
     <form className="search-bar" onSubmit={handleSubmit}>
+      <label htmlFor="searchInput">Search products:</label>
       <input
+        id="searchInput"
         type="text"
         placeholder="Search products..."
         value={query}
