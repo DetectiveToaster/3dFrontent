@@ -20,13 +20,14 @@ function Header() {
         <Link to="/">YourLogo</Link>
       </div>
       <SearchBar />
-      <button
-        className="menu-toggle"
-        onClick={() => setMenuOpen((prev) => !prev)}
-        aria-label="Toggle navigation menu"
-      >
-        \u2630
-      </button>
+      <div className="header-controls">
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          aria-label="Toggle navigation menu"
+        >
+          \u2630
+        </button>
         <nav className={`nav-links${menuOpen ? ' open' : ''}`} aria-label="Main navigation">
           <ul>
             <li>
@@ -62,6 +63,7 @@ function Header() {
         >
           {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </button>
+      </div>
       </header>
   );
 }
