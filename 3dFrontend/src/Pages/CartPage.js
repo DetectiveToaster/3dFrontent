@@ -34,10 +34,15 @@ function CartPage() {
                 <tr key={item.product_id}>
                   <td>{prod.name}</td>
                   <td>
+                    <label htmlFor={`qty-${item.product_id}`} className="sr-only">
+                      {`Quantity for ${prod.name}`}
+                    </label>
                     <input
+                      id={`qty-${item.product_id}`}
                       type="number"
                       min="1"
                       value={item.quantity}
+                      aria-label={`Quantity for ${prod.name}`}
                       onChange={e => updateCartItem(item.product_id, parseInt(e.target.value))}
                       style={{ width: 50 }}
                     />
