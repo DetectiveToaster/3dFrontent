@@ -7,6 +7,7 @@ function NotFoundPage() {
       <Helmet>
         <title>404 - Page Not Found - 3D Figures Store</title>
         <meta name="description" content="The page you are looking for does not exist." />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <h2>Page Not Found</h2>
       <p>The page you are looking for does not exist.</p>

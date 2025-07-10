@@ -40,6 +40,7 @@ function ProductListPage() {
           name="description"
           content="Browse our selection of 3D printed figures."
         />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <div className="product-list-content">
         {loading ? <ClipLoader /> : <ProductGrid products={products} />}

@@ -65,6 +65,7 @@ function ProductDetailPage() {
           name="description"
           content={product ? `Purchase ${product.name} and explore its features in detail.` : 'Detailed view of our product.'}
         />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       <div className="product-visual">
         {/* Images displayed as a carousel */}
