@@ -81,13 +81,17 @@ function ProductDetailPage() {
           <li>Depth: {product.depth} cm</li>
         </ul>
         <div style={{ marginTop: 20 }}>
-          <input
-            type="number"
-            min="1"
-            value={qty}
-            onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-            style={{ width: 50 }}
-          />
+          <label htmlFor="quantity-input">
+            Quantity
+            <input
+              id="quantity-input"
+              type="number"
+              min="1"
+              value={qty}
+              onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+              style={{ width: 50 }}
+            />
+          </label>
         <button onClick={() => addToCart(product, qty)}>Add to Cart</button>
         </div>
       </div>
