@@ -5,10 +5,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from 'react-helmet-async';
 import { useCart } from "../context/CartContext";
 import "../styles/CartPage.css";
+import { useLanguage } from '../context/LanguageContext';
 
 function CartPage() {
   const { cartItems, updateCartItem, removeCartItem } = useCart();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const getProduct = (item) => item.product || item; // fallback for user/guest
 
@@ -23,14 +25,14 @@ function CartPage() {
         <meta name="description" content="View and manage items in your shopping cart." />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <h2>Your Cart</h2>
+      <h2>{t('yourCart')}</h2>
       {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <p>{t('cartEmpty')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th><th></th>
+              <th>{t('product')}</th><th>{t('qty')}</th><th>{t('unitPrice')}</th><th>{t('subtotal')}</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -56,7 +58,7 @@ function CartPage() {
                   <td>${parseFloat(prod.selling_cost).toFixed(2)}</td>
                   <td>${(prod.selling_cost * item.quantity).toFixed(2)}</td>
                   <td>
-                    <button onClick={() => removeCartItem(item.product_id)}>Remove</button>
+                    <button onClick={() => removeCartItem(item.product_id)}>{t('remove')}</button>
                   </td>
                 </tr>
               );
@@ -65,12 +67,12 @@ function CartPage() {
         </table>
       )}
       <div className="cart-summary">
-        <p>Total: <b>${total.toFixed(2)}</b></p>
+        <p>{t('total')}: <b>${total.toFixed(2)}</b></p>
         {cartItems.length > 0 && (
-          <button onClick={() => navigate("/checkout")}>Proceed to Checkout</button>
+          <button onClick={() => navigate("/checkout")}>{t('proceedCheckout')}</button>
         )}
       </div>
-      <Link to="/products">Continue Shopping</Link>
+      <Link to="/products">{t('continueShopping')}</Link>
     </div>
   );
 }

@@ -5,29 +5,31 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import ThreeDViewer from '../Components/ThreeDViewer';
 import '../styles/LandingPage.css';
+import { useLanguage } from '../context/LanguageContext';
 
 function LandingPage() {
   const modelUrl =
     "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+  const { t } = useLanguage();
   return (
     <div className="landing-page">
       <Helmet>
         <title>Home - 3D Figures Store</title>
         <meta
           name="description"
-          content="Discover our collection of amazing 3D printed figures."
+          content={t('discover')}
         />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
       <div className="hero">
-        <h1>Welcome to Our 3D Figures Store</h1>
-        <p>Discover our collection of amazing 3D printed figures.</p>
+        <h1>{t('welcome')}</h1>
+        <p>{t('discover')}</p>
         <Link to="/products" className="cta-button">
-          Shop Now
+          {t('shopNow')}
         </Link>
       </div>
       <section className="featured-model">
-        <h2>Featured 3D Models</h2>
+        <h2>{t('featuredModels')}</h2>
         <div className="showcases">
           <ThreeDViewer
             modelUrl={modelUrl}
@@ -45,9 +47,9 @@ function LandingPage() {
             alt="Featured 3D model"
           />
         </div>
-        <p>Experience our latest creation from every angle.</p>
+        <p>{t('experience')}</p>
         <Link to="/products" className="cta-button">
-          Explore Models
+          {t('exploreModels')}
         </Link>
       </section>
     </div>

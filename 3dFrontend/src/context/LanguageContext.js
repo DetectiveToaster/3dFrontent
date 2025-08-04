@@ -1,0 +1,132 @@
+import React, { createContext, useContext, useState } from 'react';
+
+const LanguageContext = createContext();
+
+const translations = {
+  en: {
+    products: 'Products',
+    cart: 'Cart',
+    hi: 'Hi',
+    logout: 'Logout',
+    login: 'Login',
+    register: 'Register',
+    lightMode: 'Light Mode',
+    darkMode: 'Dark Mode',
+    searchPlaceholder: 'Search...',
+    search: 'Search',
+    categories: 'Categories',
+    all: 'All',
+    welcome: 'Welcome to Our 3D Figures Store',
+    discover: 'Discover our collection of amazing 3D printed figures.',
+    shopNow: 'Shop Now',
+    featuredModels: 'Featured 3D Models',
+    experience: 'Experience our latest creation from every angle.',
+    exploreModels: 'Explore Models',
+    pageNotFoundTitle: 'Page Not Found',
+    pageNotFoundMessage: 'The page you are looking for does not exist.',
+    quantity: 'Quantity',
+    addToCart: 'Add to Cart',
+    height: 'Height',
+    length: 'Length',
+    depth: 'Depth',
+    yourCart: 'Your Cart',
+    cartEmpty: 'Your cart is empty.',
+    product: 'Product',
+    qty: 'Qty',
+    unitPrice: 'Unit Price',
+    subtotal: 'Subtotal',
+    remove: 'Remove',
+    total: 'Total',
+    proceedCheckout: 'Proceed to Checkout',
+    continueShopping: 'Continue Shopping',
+    checkout: 'Checkout',
+    email: 'Email',
+    address: 'Address',
+    orderSummary: 'Order Summary',
+    paypal: 'PayPal',
+    creditCard: 'Credit Card',
+    paymentSuccess: 'Payment successful!',
+    dontHaveAccount: "Don't have an account?",
+    alreadyHaveAccount: 'Already have an account?',
+    password: 'Password',
+    loginFailed: 'Login failed',
+    registrationFailed: 'Registration failed',
+    nameOnCard: 'Name on Card',
+    cardNumber: 'Card Number',
+    expiryDate: 'Expiry Date (MM/YY)',
+    cvc: 'CVC',
+    processing: 'Processing...',
+    payNow: 'Pay Now',
+    paymentFailed: 'Payment failed. Please try again.'
+  },
+  es: {
+    products: 'Productos',
+    cart: 'Carrito',
+    hi: 'Hola',
+    logout: 'Cerrar sesión',
+    login: 'Iniciar sesión',
+    register: 'Registrarse',
+    lightMode: 'Modo Claro',
+    darkMode: 'Modo Oscuro',
+    searchPlaceholder: 'Buscar...',
+    search: 'Buscar',
+    categories: 'Categorías',
+    all: 'Todos',
+    welcome: 'Bienvenido a Nuestra Tienda de Figuras 3D',
+    discover: 'Descubre nuestra colección de increíbles figuras impresas en 3D.',
+    shopNow: 'Comprar Ahora',
+    featuredModels: 'Modelos 3D Destacados',
+    experience: 'Experimenta nuestra última creación desde todos los ángulos.',
+    exploreModels: 'Explorar Modelos',
+    pageNotFoundTitle: 'Página No Encontrada',
+    pageNotFoundMessage: 'La página que buscas no existe.',
+    quantity: 'Cantidad',
+    addToCart: 'Añadir al Carrito',
+    height: 'Altura',
+    length: 'Largo',
+    depth: 'Profundidad',
+    yourCart: 'Tu Carrito',
+    cartEmpty: 'Tu carrito está vacío.',
+    product: 'Producto',
+    qty: 'Cant.',
+    unitPrice: 'Precio Unitario',
+    subtotal: 'Subtotal',
+    remove: 'Eliminar',
+    total: 'Total',
+    proceedCheckout: 'Proceder al Pago',
+    continueShopping: 'Seguir Comprando',
+    checkout: 'Pago',
+    email: 'Correo electrónico',
+    address: 'Dirección',
+    orderSummary: 'Resumen del Pedido',
+    paypal: 'PayPal',
+    creditCard: 'Tarjeta de Crédito',
+    paymentSuccess: '¡Pago exitoso!',
+    dontHaveAccount: '¿No tienes una cuenta?',
+    alreadyHaveAccount: '¿Ya tienes una cuenta?',
+    password: 'Contraseña',
+    loginFailed: 'Error al iniciar sesión',
+    registrationFailed: 'Error al registrarse',
+    nameOnCard: 'Nombre en la tarjeta',
+    cardNumber: 'Número de tarjeta',
+    expiryDate: 'Fecha de expiración (MM/AA)',
+    cvc: 'CVC',
+    processing: 'Procesando...',
+    payNow: 'Pagar ahora',
+    paymentFailed: 'Pago fallido. Por favor, inténtalo de nuevo.'
+  }
+};
+
+export const LanguageProvider = ({ children }) => {
+  const [language, setLanguage] = useState('en');
+  const t = (key) => translations[language][key] || key;
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);
+
+export default LanguageContext;

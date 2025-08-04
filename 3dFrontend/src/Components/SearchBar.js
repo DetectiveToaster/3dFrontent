@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/SearchBar.css';
+import { useLanguage } from '../context/LanguageContext';
 
 function SearchBar() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,11 +20,11 @@ function SearchBar() {
         <input
           id="searchInput"
           type="text"
-          placeholder="Search..."
+          placeholder={t('searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-      <button type="submit">Search</button>
+      <button type="submit">{t('search')}</button>
     </form>
   );
 }

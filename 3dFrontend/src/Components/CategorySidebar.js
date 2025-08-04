@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import api from '../Services/api';
 import '../styles/CategorySidebar.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 function CategorySidebar() {
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   const params = new URLSearchParams(location.search);
   const selectedCategory = params.get('category');
@@ -31,7 +33,7 @@ function CategorySidebar() {
 
   return (
     <aside className="category-sidebar">
-      <h3>Categories</h3>
+      <h3>{t('categories')}</h3>
       <ul>
         <li className={!selectedCategory ? 'active' : ''}>
           <button
@@ -41,7 +43,7 @@ function CategorySidebar() {
               (e.key === 'Enter' || e.key === ' ') && handleCategoryClick(null)
             }
           >
-            All
+            {t('all')}
           </button>
         </li>
         {categories.map((category) => (
