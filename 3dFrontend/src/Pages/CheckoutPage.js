@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
 import CreditCardCheckoutForm from "../Components/CreditCardCheckoutForm";
 import "../styles/CheckoutPage.css";
+import { useLanguage } from '../context/LanguageContext';
 
 function CheckoutPage() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ function CheckoutPage() {
   });
   const [status, setStatus] = useState("");
   const [method, setMethod] = useState("paypal");
+  const { t } = useLanguage();
 
   const getProduct = (item) => item.product || item;
 
@@ -33,26 +35,26 @@ function CheckoutPage() {
         <meta name="description" content="Complete your purchase securely." />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <h2>Checkout</h2>
+      <h2>{t('checkout')}</h2>
       <form>
         {!user && (
           <>
             <label>
-              Email: <input name="email" value={form.email} onChange={handleChange} required />
+              {t('email')}: <input name="email" value={form.email} onChange={handleChange} required />
             </label>
             <label>
-              Address: <input name="address" value={form.address} onChange={handleChange} required />
+              {t('address')}: <input name="address" value={form.address} onChange={handleChange} required />
             </label>
           </>
         )}
         {user && (
           <>
-            <p>Email: <b>{form.email}</b></p>
-            <p>Address: <input name="address" value={form.address} onChange={handleChange} required /></p>
+            <p>{t('email')}: <b>{form.email}</b></p>
+            <p>{t('address')}: <input name="address" value={form.address} onChange={handleChange} required /></p>
           </>
         )}
         <div className="order-summary">
-          <h3>Order Summary</h3>
+          <h3>{t('orderSummary')}</h3>
           <ul>
             {cartItems.map((item) => {
               const prod = getProduct(item);
@@ -63,7 +65,7 @@ function CheckoutPage() {
               );
             })}
           </ul>
-          <p><b>Total: ${total.toFixed(2)}</b></p>
+          <p><b>{t('total')}: ${total.toFixed(2)}</b></p>
         </div>
         <div className="payment-method">
           <label>
@@ -74,7 +76,7 @@ function CheckoutPage() {
               checked={method === "paypal"}
               onChange={() => setMethod("paypal")}
             />
-            PayPal
+            {t('paypal')}
           </label>
           <label>
             <input
@@ -84,7 +86,7 @@ function CheckoutPage() {
               checked={method === "card"}
               onChange={() => setMethod("card")}
             />
-            Credit Card
+            {t('creditCard')}
           </label>
         </div>
         {method === "paypal" ? (
@@ -93,7 +95,7 @@ function CheckoutPage() {
             form={form}
             cartItems={cartItems}
             total={total}
-            onSuccess={() => setStatus("Payment successful!")}
+            onSuccess={() => setStatus(t('paymentSuccess'))}
           />
         ) : (
           <CreditCardCheckoutForm
@@ -101,7 +103,7 @@ function CheckoutPage() {
             form={form}
             cartItems={cartItems}
             total={total}
-            onSuccess={() => setStatus("Payment successful!")}
+            onSuccess={() => setStatus(t('paymentSuccess'))}
           />
         )}
         {status && <div className="status">{status}</div>}

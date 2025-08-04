@@ -3,12 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import '../styles/AuthPage.css';
+import { useLanguage } from '../context/LanguageContext';
 
 function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,7 +23,7 @@ function LoginPage() {
       await login(form.email, form.password);
       navigate('/');
     } catch (err) {
-      setError('Login failed');
+      setError(t('loginFailed'));
     }
   };
 
@@ -32,21 +34,21 @@ function LoginPage() {
         <meta name="description" content="Access your account to manage orders and purchases." />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <h2>Login</h2>
+      <h2>{t('login')}</h2>
       <form onSubmit={handleSubmit}>
         <label>
-          Email:
+          {t('email')}:
           <input name="email" value={form.email} onChange={handleChange} required />
         </label>
         <label>
-          Password:
+          {t('password')}:
           <input type="password" name="password" value={form.password} onChange={handleChange} required />
         </label>
-        <button type="submit">Login</button>
+        <button type="submit">{t('login')}</button>
         {error && <div className="error">{error}</div>}
       </form>
       <p>
-        Don't have an account? <Link to="/register">Register</Link>
+        {t('dontHaveAccount')} <Link to="/register">{t('register')}</Link>
       </p>
     </div>
   );

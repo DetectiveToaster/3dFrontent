@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import api from '../Services/api';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 
 function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
   const { clearCart } = useCart();
   const [card, setCard] = useState({ name: '', number: '', expiry: '', cvc: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,7 +39,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
       clearCart();
       if (onSuccess) onSuccess();
     } catch (err) {
-      setError('Payment failed. Please try again.');
+      setError(t('paymentFailed'));
     } finally {
       setLoading(false);
     }
@@ -46,7 +48,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
   return (
     <form className="credit-card-form" onSubmit={handleSubmit}>
       <label>
-        Name on Card:
+        {t('nameOnCard')}:
         <input
           name="name"
           value={card.name}
@@ -55,7 +57,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         />
       </label>
       <label>
-        Card Number:
+        {t('cardNumber')}:
         <input
           name="number"
           value={card.number}
@@ -64,7 +66,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         />
       </label>
       <label>
-        Expiry Date (MM/YY):
+        {t('expiryDate')}:
         <input
           name="expiry"
           value={card.expiry}
@@ -73,7 +75,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         />
       </label>
       <label>
-        CVC:
+        {t('cvc')}:
         <input
           name="cvc"
           value={card.cvc}
@@ -82,7 +84,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         />
       </label>
       <button type="submit" disabled={loading}>
-        {loading ? 'Processing...' : 'Pay Now'}
+        {loading ? t('processing') : t('payNow')}
       </button>
       {error && <div className="error">{error}</div>}
     </form>

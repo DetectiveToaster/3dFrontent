@@ -10,6 +10,7 @@ import ImageCarousel from '../Components/ImageCarousel';
 import '../styles/ProductDetailPage.css';
 import { useCart } from '../context/CartContext';
 import ClipLoader from 'react-spinners/ClipLoader';
+import { useLanguage } from '../context/LanguageContext';
 
 function ProductDetailPage() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ function ProductDetailPage() {
   const [modelUrl, setModelUrl] = useState(null);
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setLoading(true);
@@ -85,13 +87,13 @@ function ProductDetailPage() {
         <h2>{product.name}</h2>
         <p className="price">${parseFloat(product.selling_cost).toFixed(2)}</p>
         <ul className="specs">
-          <li>Height: {product.height} cm</li>
-          <li>Length: {product.length} cm</li>
-          <li>Depth: {product.depth} cm</li>
+          <li>{t('height')}: {product.height} cm</li>
+          <li>{t('length')}: {product.length} cm</li>
+          <li>{t('depth')}: {product.depth} cm</li>
         </ul>
         <div style={{ marginTop: 20 }}>
           <label htmlFor="quantity-input">
-            Quantity
+            {t('quantity')}
             <input
               id="quantity-input"
               type="number"
@@ -101,7 +103,7 @@ function ProductDetailPage() {
               style={{ width: 50 }}
             />
           </label>
-        <button onClick={() => addToCart(product, qty)}>Add to Cart</button>
+        <button onClick={() => addToCart(product, qty)}>{t('addToCart')}</button>
         </div>
       </div>
     </div>
