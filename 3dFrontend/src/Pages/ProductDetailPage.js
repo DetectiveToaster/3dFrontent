@@ -31,8 +31,9 @@ function ProductDetailPage() {
         // Fetch all image blobs
         const imgs = [];
         let modelBlobUrl = null;
-        if (response.data.media && response.data.media.length > 0) {
-          for (const media of response.data.media) {
+        const model = response.data.model3d;
+        if (model && model.media && model.media.length > 0) {
+          for (const media of model.media) {
             if (media.media_type === "image") {
               const blob = await getMediaBlob(media.id);
               imgs.push(URL.createObjectURL(blob));
@@ -86,11 +87,13 @@ function ProductDetailPage() {
       <div className="product-details">
         <h2>{product.name}</h2>
         <p className="price">${parseFloat(product.selling_cost).toFixed(2)}</p>
-        <ul className="specs">
-          <li>{t('height')}: {product.height} cm</li>
-          <li>{t('length')}: {product.length} cm</li>
-          <li>{t('depth')}: {product.depth} cm</li>
-        </ul>
+        {product.model3d && (
+          <ul className="specs">
+            <li>{t('height')}: {product.model3d.height} cm</li>
+            <li>{t('length')}: {product.model3d.length} cm</li>
+            <li>{t('width')}: {product.model3d.width} cm</li>
+          </ul>
+        )}
         <div style={{ marginTop: 20 }}>
           <label htmlFor="quantity-input">
             {t('quantity')}
