@@ -9,9 +9,10 @@ function ProductCard({ product }) {
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
-    if (product.media && product.media.length > 0) {
+    const model = product.model3d;
+    if (model && model.media && model.media.length > 0) {
       // Find first image-type media
-      const imageMedia = product.media.find(m => m.media_type === 'image');
+      const imageMedia = model.media.find(m => m.media_type === 'image');
       if (imageMedia) {
         // Fetch image with caching
         getMediaBlob(imageMedia.id)
