@@ -1,35 +1,58 @@
 /* src/components/SearchBar.css */
 
 .search-bar {
-    display: flex;
-  }
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-  .search-bar input {
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 4px 0 0 4px;
-    background: var(--color-background);
-    color: var(--color-text);
-  }
+.search-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.search-button:hover {
+  background: var(--color-surface);
+}
+.search-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 
-  .search-bar button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border: 1px solid var(--color-text);
-    border-radius: 0 4px 4px 0;
-    background: var(--color-text);
-    color: var(--color-background);
-  }
+.search-input {
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  padding: 0 0.75rem;
+  width: 0;
+  opacity: 0;
+  transform-origin: left center;
+  transition: width 180ms ease, opacity 150ms ease;
+}
 
-  .search-bar button:hover {
-    background: var(--color-background);
-    color: var(--color-text);
-  }
+.search-bar .search-input::placeholder {
+  color: var(--color-muted, #888);
+}
 
-  .search-bar input:focus,
-  .search-bar button:focus {
-    outline: 2px solid var(--color-text);
-    outline-offset: 2px;
+/* Expanded state shows the input */
+.search-bar.expanded .search-input {
+  width: clamp(160px, 24vw, 360px);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .search-bar.expanded .search-input {
+    width: min(55vw, 260px);
   }
-  
+}

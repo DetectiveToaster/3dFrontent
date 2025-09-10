@@ -2,7 +2,7 @@
 
 import React, { Suspense, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Html } from '@react-three/drei';
+import { OrbitControls, useGLTF, Html, Center } from '@react-three/drei';
 import '../styles/ThreeDViewer.css';
 class ModelErrorBoundary extends React.Component {
   constructor(props) {
@@ -35,7 +35,12 @@ function Model({ url }) {
   const scene = useMemo(() => gltf.scene.clone(), [gltf.scene]);
   useEffect(() => () => scene.traverse((obj) => obj.dispose?.()), [scene]);
   console.log("ThreeDViewer: loaded model scene", scene);
-  return <primitive object={scene} />;
+  return (
+    // Center the model so its bounding box center sits at scene origin
+    <Center>
+      <primitive object={scene} />
+    </Center>
+  );
 }
 
 function ThreeDViewer({ modelUrl, style = {}, alt }) {
@@ -50,10 +55,10 @@ function ThreeDViewer({ modelUrl, style = {}, alt }) {
   const ariaLabel = alt || '3D model viewer';
   return (
     <div className="three-d-viewer" style={viewerStyle} role="img" aria-label={ariaLabel}>
-      <Canvas camera={{ position: [0, 2, 10], fov: 45 }}>
-        {/* Bright ambient/directional light */}
-        <ambientLight intensity={1.1} />
-        <directionalLight intensity={2} position={[0, 10, 10]} />
+      <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }}>
+        {/* Softer ambient plus a key light from top-right */}
+        <ambientLight intensity={0.35} />
+        <directionalLight intensity={1.6} position={[6, 10, 6]} />
           <ModelErrorBoundary modelUrl={modelUrl} fallback={<Html center><div className="error">Failed to load 3D model.</div></Html>}>
             <Suspense fallback={<Html center><div>Loading 3D Model...</div></Html>}>
               <Model url={modelUrl} />

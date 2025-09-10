@@ -6,7 +6,7 @@ import '../styles/Footer.css';
 function Footer() {
   return (
     <footer className="footer">
-      <p>&copy; {new Date().getFullYear()} Your Company Name</p>
+      <p>&copy; {new Date().getFullYear()} The Easter Egg</p>
       <div className="social-media">
         <a href="#" target="_blank" rel="noopener noreferrer">
           Facebook
