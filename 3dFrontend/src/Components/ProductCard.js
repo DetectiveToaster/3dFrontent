@@ -9,18 +9,12 @@ function ProductCard({ product }) {
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
-    const model = product.model3d;
-    if (model && model.media && model.media.length > 0) {
-      // Find first image-type media
-      const imageMedia = model.media.find(m => m.media_type === 'image');
-      if (imageMedia) {
-        // Fetch image with caching
-        getMediaBlob(imageMedia.id)
-          .then(blob => setImageUrl(URL.createObjectURL(blob)))
-          .catch(() => setImageUrl('/placeholder.jpg'));
-      } else {
-        setImageUrl('/placeholder.jpg');
-      }
+    const mediaList = product && Array.isArray(product.media) ? product.media : [];
+    const imageMedia = mediaList.find(m => (m.kind || m.media_type) === 'image');
+    if (imageMedia) {
+      getMediaBlob(imageMedia.id)
+        .then(blob => setImageUrl(URL.createObjectURL(blob)))
+        .catch(() => setImageUrl('/placeholder.jpg'));
     } else {
       setImageUrl('/placeholder.jpg');
     }
@@ -35,7 +29,12 @@ function ProductCard({ product }) {
         <img loading="lazy" src={imageUrl || '/placeholder.jpg'} alt={product.name} />
         <h4>{product.name}</h4>
       </Link>
-      <p>${parseFloat(product.selling_cost).toFixed(2)}</p>
+      {(() => {
+        const unit = Number(
+          (product && (product.discounted_price ?? product.price)) ?? 0
+        );
+        return <p>${unit.toFixed(2)}</p>;
+      })()}
     </div>
   );
 }

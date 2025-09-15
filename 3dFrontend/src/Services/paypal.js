@@ -9,8 +9,14 @@ export function createPaypalOrder(amount, returnUrl, cancelUrl) {
     .then((res) => res.data);
 }
 
-export function capturePaypalOrder(orderId) {
+export function createPaypalOrderFromOrderId(orderId) {
   return api
-    .post('/paypal/capture-order', { order_id: orderId })
+    .post(`/paypal/order/${orderId}`)
+    .then((res) => res.data);
+}
+
+export function capturePaypalOrder(paypalOrderId) {
+  return api
+    .post(`/paypal/capture-order/${paypalOrderId}`)
     .then((res) => res.data);
 }

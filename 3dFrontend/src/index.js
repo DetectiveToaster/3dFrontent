@@ -10,6 +10,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ConsentProvider } from './context/ConsentContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -18,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
-              <App />
+              <ConsentProvider>
+                <App />
+              </ConsentProvider>
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

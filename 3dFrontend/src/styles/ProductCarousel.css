@@ -1,0 +1,49 @@
+/* Horizontally scrollable, swipeable product carousel */
+.product-carousel {
+  position: relative;
+}
+
+.pc-scroller {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(220px, 28vw, 320px);
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 40px; /* space for arrows */
+}
+
+.pc-scroller:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.pc-slide {
+  scroll-snap-align: start;
+}
+
+.pc-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pc-arrow.left { left: 4px; }
+.pc-arrow.right { right: 4px; }
+
+.pc-arrow:hover { background: var(--color-surface); }
+
+@media (max-width: 768px) {
+  .pc-scroller { grid-auto-columns: clamp(240px, 80vw, 320px); padding: 8px 32px; }
+}
+

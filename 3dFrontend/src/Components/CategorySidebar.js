@@ -28,6 +28,8 @@ function CategorySidebar() {
     } else {
       params.set('category', categoryId);
     }
+    // Reset pagination when changing category
+    params.delete('page');
     navigate(`/products?${params.toString()}`);
   };
 
@@ -42,6 +44,7 @@ function CategorySidebar() {
             onKeyDown={(e) =>
               (e.key === 'Enter' || e.key === ' ') && handleCategoryClick(null)
             }
+            aria-pressed={!selectedCategory}
           >
             {t('all')}
           </button>
@@ -58,6 +61,7 @@ function CategorySidebar() {
                 (e.key === 'Enter' || e.key === ' ') &&
                 handleCategoryClick(category.id)
               }
+              aria-pressed={selectedCategory === category.id.toString()}
             >
               {category.name}
             </button>

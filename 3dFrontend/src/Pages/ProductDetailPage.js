@@ -28,20 +28,18 @@ function ProductDetailPage() {
       .get(`/products/${id}`)
       .then(async (response) => {
         setProduct(response.data);
-        // Fetch all image blobs
         const imgs = [];
         let modelBlobUrl = null;
-        const model = response.data.model3d;
-        if (model && model.media && model.media.length > 0) {
-          for (const media of model.media) {
-            if (media.media_type === "image") {
-              const blob = await getMediaBlob(media.id);
-              imgs.push(URL.createObjectURL(blob));
-            }
-            if (media.media_type === "model" && !modelBlobUrl) {
-              const blob = await getMediaBlob(media.id);
-              modelBlobUrl = URL.createObjectURL(blob);
-            }
+        const mediaList = Array.isArray(response.data.media) ? response.data.media : [];
+        for (const media of mediaList) {
+          const kind = media.kind || media.media_type; // backward compat
+          if (kind === 'image') {
+            const blob = await getMediaBlob(media.id);
+            imgs.push(URL.createObjectURL(blob));
+          }
+          if (kind === 'model' && !modelBlobUrl) {
+            const blob = await getMediaBlob(media.id);
+            modelBlobUrl = URL.createObjectURL(blob);
           }
         }
         setImages(imgs);
@@ -56,6 +54,23 @@ function ProductDetailPage() {
       if (modelUrl) URL.revokeObjectURL(modelUrl);
     };
     // eslint-disable-next-line
+  }, [id]);
+
+  // Register a product view once per session/id with a small debounce
+  useEffect(() => {
+    if (!id) return;
+    const key = `viewed_product_${id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+    } catch (_) {
+      // sessionStorage may be unavailable; best-effort only
+    }
+    const timer = setTimeout(() => {
+      api.post(`/products/${id}/view`).catch(() => {});
+      try { sessionStorage.setItem(key, '1'); } catch (_) {}
+    }, 800); // debounce ~0.8s to avoid quick back/forward double posts
+
+    return () => clearTimeout(timer);
   }, [id]);
 
   if (loading) return <div className="loading"><ClipLoader /></div>;
@@ -86,12 +101,31 @@ function ProductDetailPage() {
       </div>
       <div className="product-details">
         <h2>{product.name}</h2>
-        <p className="price">${parseFloat(product.selling_cost).toFixed(2)}</p>
-        {product.model3d && (
+        {(() => {
+          const unit = Number(
+            (product && (product.discounted_price ?? product.price)) ?? 0
+          );
+          return <p className="price">${unit.toFixed(2)}</p>;
+        })()}
+        {product && product.type === '3d' && (
           <ul className="specs">
-            <li>{t('height')}: {product.model3d.height} cm</li>
-            <li>{t('length')}: {product.model3d.length} cm</li>
-            <li>{t('width')}: {product.model3d.width} cm</li>
+            {product.height != null && <li>{t('height')}: {product.height} cm</li>}
+            {product.length != null && <li>{t('length')}: {product.length} cm</li>}
+            {product.width != null && <li>{t('width')}: {product.width} cm</li>}
+          </ul>
+        )}
+        {product && product.type === 'card' && (
+          <ul className="specs">
+            {product.series && <li>Series: {product.series}</li>}
+            {product.rarity && <li>Rarity: {product.rarity}</li>}
+            {product.condition && <li>Condition: {product.condition}</li>}
+          </ul>
+        )}
+        {product && product.type === 'manual' && (
+          <ul className="specs">
+            {product.page_count != null && <li>Pages: {product.page_count}</li>}
+            {product.language && <li>Language: {product.language}</li>}
+            {product.format && <li>Format: {product.format}</li>}
           </ul>
         )}
         <div style={{ marginTop: 20 }}>

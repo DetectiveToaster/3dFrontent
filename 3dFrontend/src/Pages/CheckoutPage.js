@@ -8,10 +8,13 @@ import PaypalCheckoutButton from "../Components/PaypalCheckoutButton";
 import CreditCardCheckoutForm from "../Components/CreditCardCheckoutForm";
 import "../styles/CheckoutPage.css";
 import { useLanguage } from '../context/LanguageContext';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { useConsent } from '../context/ConsentContext';
 
 function CheckoutPage() {
   const { user } = useAuth();
   const { cartItems } = useCart();
+  const { allow } = useConsent();
   const [form, setForm] = useState({
     email: user?.email || "",
     address: user?.address || "",
@@ -24,9 +27,11 @@ function CheckoutPage() {
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
-  const total = cartItems.reduce((sum, item) =>
-    sum + (getProduct(item).selling_cost * item.quantity), 0
-  );
+  const total = cartItems.reduce((sum, item) => {
+    const prod = getProduct(item);
+    const unit = Number((prod && (prod.discounted_price ?? prod.price)) ?? 0);
+    return sum + unit * item.quantity;
+  }, 0);
 
   return (
     <div className="checkout-page">
@@ -60,7 +65,7 @@ function CheckoutPage() {
               const prod = getProduct(item);
               return (
                 <li key={item.product_id}>
-                  {prod.name} x {item.quantity} (${(prod.selling_cost * item.quantity).toFixed(2)})
+                  {prod.name} x {item.quantity} (${(Number((prod.discounted_price ?? prod.price) ?? 0) * item.quantity).toFixed(2)})
                 </li>
               );
             })}
@@ -90,13 +95,17 @@ function CheckoutPage() {
           </label>
         </div>
         {method === "paypal" ? (
-          <PaypalCheckoutButton
-            user={user}
-            form={form}
-            cartItems={cartItems}
-            total={total}
-            onSuccess={() => setStatus(t('paymentSuccess'))}
-          />
+          // Load PayPal script only on checkout and only when specifically needed.
+          // Considered necessary to complete payment initiated by the user.
+          <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || 'test' }}>
+            <PaypalCheckoutButton
+              user={user}
+              form={form}
+              cartItems={cartItems}
+              total={total}
+              onSuccess={() => setStatus(t('paymentSuccess'))}
+            />
+          </PayPalScriptProvider>
         ) : (
           <CreditCardCheckoutForm
             user={user}
@@ -105,6 +114,11 @@ function CheckoutPage() {
             total={total}
             onSuccess={() => setStatus(t('paymentSuccess'))}
           />
+        )}
+        {!allow('functional') && method !== 'paypal' && (
+          <p style={{ marginTop: 8, fontSize: '0.9rem', color: '#555' }}>
+            Note: Enabling functional cookies improves checkout experience (e.g., saved details).
+          </p>
         )}
         {status && <div className="status">{status}</div>}
       </form>

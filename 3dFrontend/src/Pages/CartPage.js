@@ -14,9 +14,11 @@ function CartPage() {
 
   const getProduct = (item) => item.product || item; // fallback for user/guest
 
-  const total = cartItems.reduce((sum, item) =>
-    sum + (getProduct(item).selling_cost * item.quantity), 0
-  );
+  const total = cartItems.reduce((sum, item) => {
+    const prod = getProduct(item);
+    const unit = Number((prod && (prod.discounted_price ?? prod.price)) ?? 0);
+    return sum + unit * item.quantity;
+  }, 0);
 
   return (
     <div className="cart-page">
@@ -55,8 +57,8 @@ function CartPage() {
                       style={{ width: 50 }}
                     />
                   </td>
-                  <td>${parseFloat(prod.selling_cost).toFixed(2)}</td>
-                  <td>${(prod.selling_cost * item.quantity).toFixed(2)}</td>
+                  <td>${Number((prod.discounted_price ?? prod.price) ?? 0).toFixed(2)}</td>
+                  <td>${(Number((prod.discounted_price ?? prod.price) ?? 0) * item.quantity).toFixed(2)}</td>
                   <td>
                     <button onClick={() => removeCartItem(item.product_id)}>{t('remove')}</button>
                   </td>

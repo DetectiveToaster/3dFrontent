@@ -41,7 +41,7 @@ export function CartProvider({ children }) {
       // Backend cart (try update, then add)
       const existing = cartItems.find(i => i.product_id === product.id);
       if (existing) {
-        await api.put(`/cart/${existing.id}`, { quantity: existing.quantity + quantity });
+        await api.put(`/cart/${existing.id}`, null, { params: { quantity: existing.quantity + quantity } });
       } else {
         await api.post("/cart/", { user_id: user.id, product_id: product.id, quantity });
       }
@@ -72,7 +72,7 @@ export function CartProvider({ children }) {
     if (user) {
       const existing = cartItems.find(i => i.product_id === product_id);
       if (existing) {
-        await api.put(`/cart/${existing.id}`, { quantity });
+        await api.put(`/cart/${existing.id}`, null, { params: { quantity } });
         const res = await api.get("/cart/");
         setCartItems(res.data);
         toast.info("Cart updated");
