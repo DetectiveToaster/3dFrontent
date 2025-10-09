@@ -1,42 +1,76 @@
-/* src/pages/LandingPage.css */
+﻿/* src/pages/LandingPage.css */
 
 .landing-page .hero {
     text-align: center;
     padding: 4rem 1rem;
-  }
-  
+}
+
 .cta-button {
-  display: inline-block;
-  margin-top: 2rem;
-  padding: 1rem 2rem;
-  background-color: var(--color-primary);
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2rem;
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    background-color: var(--color-primary);
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
 }
 
-.featured-model {
-  text-align: center;
-  padding: 2rem 1rem;
+.featured-highlighted {
+    text-align: center;
+    padding: 2.5rem 1rem 3rem;
 }
 
-.featured-model h2 {
-  margin-bottom: 1rem;
+.featured-highlighted h2 {
+    margin-bottom: 0.5rem;
 }
 
-.featured-model p {
-  margin: 1rem 0;
+.featured-highlighted > p {
+    margin: 0.75rem auto 1.5rem;
+    max-width: 640px;
 }
 
-/* Containers for the row of showcases displayed on the landing page */
-.showcases {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  margin-top: 1rem;
+.highlighted-showcases {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
 }
 
-.showcases .three-d-viewer {
-  height: 500px;
-  max-width: 600px;
+.highlighted-showcase-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 420px);
+}
+
+.highlighted-showcase-card .three-d-viewer {
+    width: 100%;
+    height: 420px;
+}
+
+.highlighted-info {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.highlighted-link {
+    color: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.highlighted-link:hover,
+.highlighted-link:focus {
+    text-decoration: underline;
+}
+
+.price-tag {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 600;
+}
+
+.cta-wrapper {
+    margin-top: 2rem;
 }

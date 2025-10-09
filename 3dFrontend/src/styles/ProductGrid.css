@@ -2,14 +2,21 @@
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  padding: 0;
+  list-style: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1280px) {
   .product-grid {
-    gap: 1.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
-  
+
+@media (max-width: 600px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+  }
+}

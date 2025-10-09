@@ -94,3 +94,8 @@ export async function applyProductDiscount(productId, mode, value) {
   const res = await api.patch(`/products/${productId}/discount`, { mode, value: Number(value) });
   return res.data;
 }
+
+export async function deleteProductMedia(mediaId) {
+  const res = await api.delete(`/product_media/${mediaId}`);
+  return res.data;
+}

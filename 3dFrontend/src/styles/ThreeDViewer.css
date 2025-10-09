@@ -1,13 +1,25 @@
 /* src/components/ThreeDViewer.css */
 
 .three-d-viewer {
+  position: relative;
   width: 100%;
-  max-width: 1600px;
-  height: 1200px;
   background: var(--viewer-background);
   border-radius: 12px;
   overflow: hidden;
   margin: 0 auto 20px auto;
+  display: block;
+}
+
+.three-d-viewer canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.three-d-viewer--compact {
+  margin: 0;
+  border-radius: 16px;
+  max-width: none;
 }
 
 .visually-hidden {
@@ -24,7 +36,6 @@
 
 @media (max-width: 600px) {
   .three-d-viewer {
-    height: 600px;
+    margin-bottom: 16px;
   }
 }
-

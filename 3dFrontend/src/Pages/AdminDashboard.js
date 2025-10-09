@@ -6,6 +6,7 @@ import {
   createManualProduct,
   uploadProductMedia,
   listProductMedia,
+  deleteProductMedia,
   getAllProducts,
   setProductVisibility,
   updateProductPrice,
@@ -47,7 +48,7 @@ function AdminDashboard() {
   const refreshProducts = async () => {
     try {
       setLoadingProducts(true);
-      const data = await getAllProducts({ limit: 100 });
+      const data = await getAllProducts({ limit: 50 });
       setAdminProducts(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
@@ -131,6 +132,20 @@ function AdminDashboard() {
       toast.error('Failed to fetch media');
     }
   };
+
+  const removeMedia = async (mediaId) => {
+    const id = Number(mediaId);
+    if (!id) { toast.warn('Missing media id'); return; }
+    try {
+      await deleteProductMedia(id);
+      setMediaList(prev => prev.filter(item => item.id !== id));
+      toast.success(`Removed media #${id}`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to remove media');
+    }
+  };
+
 
   const onFileChange = (e) => {
     const f = e.target.files && e.target.files[0];
@@ -320,7 +335,8 @@ function AdminDashboard() {
           <ul className="media-list">
             {mediaList.map(m => (
               <li key={m.id}>
-                <code>#{m.id}</code> {m.kind || m.media_type} — {m.filename} <span className="muted">({m.content_type})</span>
+                <code>#{m.id}</code> {m.kind || m.media_type} - {m.filename} <span className="muted">({m.content_type})</span>
+                <button type="button" onClick={() => removeMedia(m.id)} style={{ marginLeft: 8 }}>Remove</button>
               </li>
             ))}
           </ul>
@@ -332,7 +348,7 @@ function AdminDashboard() {
       <section className="card">
         <h2>Manage Products</h2>
         {loadingProducts ? (
-          <p className="muted">Loading…</p>
+          <p className="muted">Loading</p>
         ) : adminProducts && adminProducts.length > 0 ? (
           <>
           <div className="row" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
@@ -344,7 +360,7 @@ function AdminDashboard() {
               </select>
             </label>
             <label>Search
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name…" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name" />
             </label>
             <button type="button" onClick={refreshProducts}>Reload</button>
           </div>
@@ -431,9 +447,12 @@ function DiscountEditor({ product, onApply }) {
         aria-label={`Discount value for ${product.name}`}
       />
       <button type="button" onClick={() => onApply(product, mode, num)} disabled={!valid} aria-disabled={!valid}>Apply</button>
-      {!valid && <span className="muted" aria-live="polite" style={{ marginLeft: 6 }}>Enter {mode === 'percent' ? '0–100%' : '≥ 0'}</span>}
+      {!valid && <span className="muted" aria-live="polite" style={{ marginLeft: 6 }}>Enter {mode === 'percent' ? '100%' : '0'}</span>}
     </div>
   );
 }
 
 export default AdminDashboard;
+
+
+
