@@ -7,6 +7,7 @@ import api from '../Services/api';
 import ProductGrid from '../Components/ProductGrid';
 import '../styles/ProductListPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
+import { useLanguage } from '../context/LanguageContext';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -22,6 +23,8 @@ function ProductListPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const { t } = useLanguage();
   const query = useQuery();
   const navigate = useNavigate();
   const searchQuery = query.get('search') || '';
@@ -47,6 +50,24 @@ function ProductListPage() {
       .catch((error) => console.error('Error fetching products:', error))
       .finally(() => setLoading(false));
   }, [searchQuery, category, skip, limit]);
+
+  useEffect(() => {
+    let ignore = false;
+    api
+      .get('/categories/')
+      .then((response) => {
+        if (ignore) return;
+        const items = Array.isArray(response.data) ? response.data : [];
+        setCategories(items);
+      })
+      .catch((error) => {
+        if (!ignore) {
+          console.error('Error fetching categories:', error);
+          setCategories([]);
+        }
+      });
+    return () => { ignore = true; };
+  }, []);
 
   const updateQuery = (next) => {
     const params = new URLSearchParams(window.location.search);
@@ -86,15 +107,39 @@ function ProductListPage() {
     }
   }, [products, sort]);
 
-  const activeFilters = [];
-  if (searchQuery) {
-    activeFilters.push(`Search: "${searchQuery}"`);
-  }
-  if (category) {
-    activeFilters.push(`Category ${category}`);
-  }
+  const categoryOptions = useMemo(() => {
+    const base = [{ id: '', label: t('all') }];
+    if (!Array.isArray(categories) || categories.length === 0) {
+      return base;
+    }
+    return base.concat(
+      categories.map((c) => ({
+        id: String(c.id),
+        label: c.name,
+      }))
+    );
+  }, [categories, t]);
 
-  const startRange = sortedProducts.length ? (skip + 1) : 0;
+  const handleCategorySelect = (value) => {
+    if (!value) {
+      updateQuery({ category: null, page: 1 });
+      return;
+    }
+    if (value === category) return;
+    updateQuery({ category: value, page: 1 });
+  };
+
+  const isCategoryActive = (value) => {
+    if (!value) return !category;
+    return category === value;
+  };
+
+  const heroTags = useMemo(
+    () => ['resin casts', 'hand-painted', 'limited runs'],
+    []
+  );
+
+  const startRange = sortedProducts.length ? skip + 1 : 0;
   const endRange = skip + sortedProducts.length;
 
   const heroTitle = searchQuery ? `Results for "${searchQuery}"` : 'Collector Figures Gallery';
@@ -103,7 +148,7 @@ function ProductListPage() {
     : 'Premium resin statues and collectibles rendered in full 3D detail.';
 
   return (
-    <div className="product-list-page">
+    <div className="catalog-page">
       <Helmet>
         <title>Products - 3D Figures Store</title>
         <meta
@@ -112,62 +157,95 @@ function ProductListPage() {
         />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <section className="product-list-hero">
-        <div className="product-list-hero__content">
-          <h1>{heroTitle}</h1>
-          <p>{heroSubtitle}</p>
-        </div>
-        <div className="product-list-hero__count">
-          {sortedProducts.length > 0 ? `${startRange}-${endRange}` : '0'}
-          <span>items</span>
+
+      <section className="catalog-hero">
+        <div className="catalog-container catalog-hero__inner">
+          <div className="catalog-hero__content">
+            <span className="catalog-hero__eyebrow">Collector spotlight</span>
+            <h1>{heroTitle}</h1>
+            <p className="catalog-hero__lead">{heroSubtitle}</p>
+            <div className="catalog-hero__tags">
+              {heroTags.map((label) => (
+                <span key={label} className="catalog-hero__tag">{label}</span>
+              ))}
+            </div>
+          </div>
+          <div className="catalog-hero__stat" aria-live="polite">
+            <span className="catalog-hero__stat-value">
+              {sortedProducts.length > 0 ? `${startRange}-${endRange}` : '0'}
+            </span>
+            <span className="catalog-hero__stat-label">
+              {sortedProducts.length === 1 ? 'item' : 'items'}
+            </span>
+          </div>
         </div>
       </section>
-      <nav className="product-list-toolbar" aria-label="Product filters and sorting">
-        <div className="product-list-toolbar__filters">
-          {activeFilters.length > 0 ? (
-            activeFilters.map((label) => (
-              <span key={label} className="toolbar-pill">{label}</span>
-            ))
-          ) : (
-            <span className="toolbar-pill toolbar-pill--ghost">All products</span>
-          )}
+
+      <section className="catalog-toolbar" aria-label="Product filters and sorting">
+        <div className="catalog-container catalog-toolbar__inner">
+          <div className="catalog-toolbar__tags" role="list">
+            {categoryOptions.map((option) => (
+              <button
+                key={option.id || 'all'}
+                type="button"
+                role="listitem"
+                className={`catalog-tag${isCategoryActive(option.id) ? ' is-active' : ''}`}
+                onClick={() => handleCategorySelect(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+            {searchQuery && (
+              <span className="catalog-toolbar__search">
+                {`Search: "${searchQuery}"`}
+              </span>
+            )}
+          </div>
+          <div className="catalog-toolbar__controls">
+            <label htmlFor="sort-select">
+              Sort
+              <select id="sort-select" value={sort} onChange={changeSort}>
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="alpha">Name A-Z</option>
+              </select>
+            </label>
+            <label htmlFor="limit-select">
+              Per page
+              <select id="limit-select" value={String(limit)} onChange={changeLimit}>
+                <option value="8">8</option>
+                <option value="12">12</option>
+                <option value="16">16</option>
+              </select>
+            </label>
+          </div>
         </div>
-        <div className="product-list-toolbar__controls">
-          <label className="toolbar-control" htmlFor="sort-select">
-            Sort
-            <select id="sort-select" value={sort} onChange={changeSort}>
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="alpha">Name A-Z</option>
-            </select>
-          </label>
-          <label className="toolbar-control" htmlFor="limit-select">
-            Per page
-            <select id="limit-select" value={String(limit)} onChange={changeLimit}>
-              <option value="8">8</option>
-              <option value="12">12</option>
-              <option value="16">16</option>
-            </select>
-          </label>
-        </div>
-      </nav>
-      <div className="product-list-content">
+      </section>
+
+      <div className="catalog-container catalog-content">
         {loading ? (
-          <div className="product-list-loading">
+          <div className="catalog-loading">
             <ClipLoader size={48} />
           </div>
         ) : (
           <ProductGrid products={sortedProducts} />
         )}
       </div>
-      <div className="pagination-controls">
-        <button className="pagination-button" onClick={goPrev} disabled={page <= 1}>Previous</button>
-        <span className="pagination-status">Page {page}</span>
-        <button className="pagination-button" onClick={goNext} disabled={!hasMore}>Next</button>
+
+      <div className="catalog-container catalog-pagination">
+        <button className="catalog-pagination__button" onClick={goPrev} disabled={page <= 1}>
+          Previous
+        </button>
+        <span className="catalog-pagination__status">Page {page}</span>
+        <button className="catalog-pagination__button" onClick={goNext} disabled={!hasMore}>
+          Next
+        </button>
       </div>
     </div>
   );
 }
 
 export default ProductListPage;
+
+

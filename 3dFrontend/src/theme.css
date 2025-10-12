@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   --color-text: #333;
   --color-background: #ffffff;
   --color-surface: #f8f8f8;
-  --color-primary: #ff6600;
-  --color-accent: #1163e6;
-  --color-accent-hover: #0b3b8c;
+  --color-primary: #c0282f;
+  --color-accent: #e0565f;
+  --color-accent-hover: #b23a43;
   --color-success: #219c55;
   --color-success-hover: #17643c;
   --color-error: #b00020;
@@ -13,20 +15,29 @@
   --color-border-muted: #f0f0f0;
   --color-background-muted: #f7f7fa;
   --viewer-background: #202020;
-  --font-base: 'Inter', sans-serif;
-  --font-heading: 'Inter', sans-serif;
+  --font-base: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --header-bg: rgba(255, 255, 255, 0.88);
+  --header-border-color: rgba(0, 0, 0, 0.08);
+  --header-shadow: 0 12px 28px rgba(15, 15, 15, 0.08);
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 2rem;
 }
 
 .dark-theme {
-  --color-text: #f8f8f8;
-  --color-background: #121212;
-  --color-surface: #1e1e1e;
-  --color-border: #444;
-  --color-border-light: #666;
-  --color-border-muted: #333;
-  --color-background-muted: #1e1e1e;
-  --viewer-background: #202020;
+  --color-text: #f2f2f5;
+  --color-background: #0a0a0a;
+  --color-surface: #141417;
+  --color-border: #222229;
+  --color-border-light: #2c2c34;
+  --color-border-muted: #16161c;
+  --color-background-muted: #111116;
+  --viewer-background: #101015;
+  --color-primary: #c0282f;
+  --color-accent: #f87171;
+  --color-accent-hover: #ef4444;
+  --header-bg: rgba(10, 10, 10, 0.75);
+  --header-border-color: rgba(255, 255, 255, 0.08);
+  --header-shadow: 0 22px 46px rgba(0, 0, 0, 0.35);
 }

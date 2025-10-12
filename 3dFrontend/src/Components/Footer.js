@@ -10,14 +10,14 @@ function Footer() {
     <footer className="footer">
       <p>&copy; {new Date().getFullYear()} The Easter Egg</p>
       <div className="social-media">
-        <a href="#" target="_blank" rel="noopener noreferrer">
-          Facebook
-        </a>
-        <a href="#" target="_blank" rel="noopener noreferrer">
+        <a href="https://instagram.com/yourstudio" target="_blank" rel="noopener noreferrer">
           Instagram
         </a>
-        <a href="#" target="_blank" rel="noopener noreferrer">
-          Twitter
+        <a href="https://youtube.com/@yourstudio" target="_blank" rel="noopener noreferrer">
+          YouTube
+        </a>
+        <a href="mailto:sales@yourbrand.com">
+          Email
         </a>
       </div>
       <div className="legal-links">

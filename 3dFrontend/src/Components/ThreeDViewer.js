@@ -29,7 +29,6 @@ class ModelErrorBoundary extends React.Component {
 }
 
 function Model({ url, onFramed }) {
-  console.log('ThreeDViewer: loading model from', url);
   const gltf = useGLTF(url, true); // true = useDraco (if model is compressed)
   const scene = useMemo(() => gltf.scene.clone(), [gltf.scene]);
 
@@ -41,8 +40,12 @@ function Model({ url, onFramed }) {
     return () => onFramed(null);
   }, [scene, onFramed]);
 
-  useEffect(() => () => scene.traverse((obj) => obj.dispose?.()), [scene]);
-  console.log('ThreeDViewer: loaded model scene', scene);
+  useEffect(
+    () => () => {
+      scene.traverse((obj) => obj.dispose?.());
+    },
+    [scene]
+  );
   return (
     // Center the model so its bounding box center sits at scene origin
     <Center>
@@ -89,16 +92,14 @@ function ThreeDViewer({
   modelUrl,
   style = {},
   alt,
-  height = 1200,
+  height = 'min(55vh, 520px)',
   maxWidth = '1600px',
   className = '',
 }) {
   const [frameData, setFrameData] = useState(null);
 
   useEffect(() => {
-    if (!modelUrl) {
-      setFrameData(null);
-    }
+    setFrameData(null);
   }, [modelUrl]);
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;

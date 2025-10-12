@@ -1,4 +1,4 @@
-﻿// src/pages/LandingPage.js
+// src/pages/LandingPage.js
 
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -88,6 +88,12 @@ function LandingPage() {
     return `$${unit.toFixed(2)}`;
   };
 
+  const highlightedCount = highlighted.length;
+  const showcaseCount = highlightedShowcase.length;
+  const heroStatValue = highlightedCount ? highlightedCount.toString().padStart(1, '0') : '0';
+  const heroStatLabel = highlightedCount === 1 ? 'highlight' : 'highlights';
+  const ribbonItems = ['Collector Figures', 'Premium Resin', 'Hand-Painted', 'Limited Runs'];
+
   return (
     <div className="landing-page">
       <Helmet>
@@ -95,48 +101,85 @@ function LandingPage() {
         <meta name="description" content={t('discover')} />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <div className="hero">
-        <h1>{t('welcome')}</h1>
-        <p>{t('discover')}</p>
-        <Link to="/products" className="cta-button">
-          {t('shopNow')}
-        </Link>
-      </div>
 
-      <section className="featured-highlighted">
-        <h2>{t('featuredModels')}</h2>
-        <p>{t('experience')}</p>
+      <section className="landing-hero">
+        <div className="landing-hero__ribbon" aria-hidden="true">
+          {ribbonItems.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+        <div className="landing-hero__content">
+          <span className="landing-hero__eyebrow">Premium 3D Drops</span>
+          <h1>{t('welcome')}</h1>
+          <p className="landing-hero__lead">{t('discover')}</p>
+          <div className="landing-hero__actions">
+            <Link to="/products" className="landing-cta landing-cta--primary">
+              {t('shopNow')}
+            </Link>
+            <Link to="/products" className="landing-cta landing-cta--ghost">
+              {t('exploreModels')}
+            </Link>
+          </div>
+        </div>
+        <div className="landing-hero__stat" aria-live="polite">
+          <span className="landing-hero__stat-value">{heroStatValue}</span>
+          <span className="landing-hero__stat-label">{heroStatLabel}</span>
+        </div>
+      </section>
+
+      <section className="landing-toolbar" aria-label="Highlight overview">
+        <div className="landing-toolbar__filters">
+          <span className="toolbar-pill">All products</span>
+          <span className="toolbar-pill toolbar-pill--ghost">
+            {showcaseCount > 0 ? `${showcaseCount} live previews` : 'Awaiting previews'}
+          </span>
+        </div>
+        <Link to="/products" className="landing-toolbar__cta">
+          Browse catalog
+        </Link>
+      </section>
+
+      <section className="landing-featured">
+        <header className="landing-featured__header">
+          <h2>{t('featuredModels')}</h2>
+          <p>{t('experience')}</p>
+        </header>
+
         {loadingHighlights || loadingModels ? (
-          <p className="muted">Loading highlighted models...</p>
+          <p className="landing-featured__state muted">Loading highlighted models...</p>
         ) : highlightedShowcase.length > 0 ? (
           <>
-            <div className="highlighted-showcases">
+            <div className="landing-featured__grid">
               {highlightedShowcase.map(({ product, modelUrl }) => (
-                <article key={product.id} className="highlighted-showcase-card">
-                  <ThreeDViewer
-                    modelUrl={modelUrl}
-                    style={{ maxWidth: '420px', height: '420px' }}
-                    alt={`3D model of ${product.name}`}
-                  />
-                  <div className="highlighted-info">
-                    <Link to={`/products/${product.id}`} className="highlighted-link">
+                <article key={product.id} className="landing-featured__card">
+                  <div className="landing-featured__viewer">
+                    <ThreeDViewer
+                      modelUrl={modelUrl}
+                      style={{ width: '100%', height: '360px' }}
+                      alt={`3D model of ${product.name}`}
+                    />
+                  </div>
+                  <div className="landing-featured__meta">
+                    <Link to={`/products/${product.id}`} className="landing-featured__link">
                       {product.name}
                     </Link>
-                    <span className="price-tag">{formatPrice(product)}</span>
+                    <span className="landing-featured__price">{formatPrice(product)}</span>
                   </div>
                 </article>
               ))}
             </div>
-            <div className="cta-wrapper">
-              <Link to="/products" className="cta-button">
+            <div className="landing-featured__cta">
+              <Link to="/products" className="landing-cta landing-cta--primary">
                 {t('exploreModels')}
               </Link>
             </div>
           </>
         ) : highlighted.length > 0 ? (
-          <p className="muted">Highlighted products currently lack 3D previews.</p>
+          <p className="landing-featured__state muted">
+            Highlighted products currently lack 3D previews.
+          </p>
         ) : (
-          <p className="muted">No products currently available.</p>
+          <p className="landing-featured__state muted">No products currently available.</p>
         )}
       </section>
     </div>

@@ -12,6 +12,43 @@ This repository contains a React based storefront located in the `3dFrontend/` d
 - Script for generating `sitemap.xml`
 
 
+
+## Technology Overview
+
+### Core Frontend Stack
+- **React 18** application bootstrapped with Create React App (CRA).
+- Client-side routing via **React Router** (see `src/App.js`) with a default storefront layout and an experimental Tailwind showcase mounted at `/new`.
+- Page metadata handled through **react-helmet-async**.
+- Toast notifications provided by **react-toastify**.
+
+### Styling & Design System
+- Legacy global styling lives under `src/styles/*.css` and continues to support the storefront.
+- **Tailwind CSS 3** (configured in `tailwind.config.js` with PostCSS/Autoprefixer) powers the new showcase experience (`src/ShowcaseApp.jsx`). Tailwind directives are injected in `src/index.css`, which also locks `html, body, #root` to full height.
+- Theme variables (light/dark palettes) are defined in `src/theme.css` and toggled at runtime by `src/context/ThemeContext.js`.
+- Iconography uses **lucide-react**.
+
+### State, Data & Context
+- Global providers registered in `src/index.js` supply app-wide state:
+  - `ThemeProvider` (light/dark mode)
+  - `LanguageProvider` (basic i18n strings)
+  - `AuthProvider` (session/auth handling)
+  - `CartProvider` (cart persistence and actions)
+  - `ConsentProvider` (cookie/consent banner logic)
+- REST communication is wrapped in `src/Services/api.js` with product helpers in `src/Services/products.js` and media caching via IndexedDB inside `src/Services/mediaCache.js`.
+
+### 3D & Media
+- Product previews rely on **@react-three/fiber** / Three.js through `src/Components/ThreeDViewer.js` with accompanying styling in `src/styles/ThreeDViewer.css`.
+- Admin tooling (`src/Pages/AdminDashboard.js`) manages product CRUD, pricing, visibility, and media uploads.
+
+### Payments, Auth & Utilities
+- Checkout integrates the PayPal SDK on demand (`src/Pages/CheckoutPage.js`), using the `REACT_APP_PAYPAL_CLIENT_ID` environment variable.
+- Authentication helpers live in `src/context/AuthContext.js` and `src/utils/authz.js`.
+- Ancillary scripts (e.g., `scripts/generate-sitemap.js`) support build and deployment tasks.
+
+### Build & Tooling
+- Tailwind/PostCSS pipelines are configured via committed `tailwind.config.js` and `postcss.config.js` files.
+- CRA provides the build toolchain (`npm start`, `npm run build`, `npm test`). ESLint warnings currently flag placeholder links (`href="#"`) and hook dependencies—address these prior to production.
+
 ## Repository Structure
 
 - `3dFrontend/` - React application

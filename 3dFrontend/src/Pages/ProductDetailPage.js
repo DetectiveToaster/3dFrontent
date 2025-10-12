@@ -1,59 +1,154 @@
 // src/pages/ProductDetailPage.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import api from '../Services/api';
 import { getMediaBlob } from '../Services/mediaCache';
 import ThreeDViewer from '../Components/ThreeDViewer';
 import ImageCarousel from '../Components/ImageCarousel';
+import InquiryModal from '../Components/InquiryModal';
 import '../styles/ProductDetailPage.css';
-import { useCart } from '../context/CartContext';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { useLanguage } from '../context/LanguageContext';
 
+const DEFAULT_DESCRIPTION = 'Message us to customise paint finishes, scale, and presentation packaging.';
+const INFO_TILES = [
+  {
+    title: 'Hand finished',
+    body: 'Layered shading, gloss accents, and sealed protection on every piece.',
+  },
+  {
+    title: 'Secure shipping',
+    body: 'Foam-packed, tracked, and insured delivery to collectors worldwide.',
+  },
+  {
+    title: 'Limited runs',
+    body: 'Numbered releases supplied with certificates of authenticity.',
+  },
+];
+
+function formatCurrencyValue(product) {
+  if (!product) return '$0.00';
+  const value = Number(product.discounted_price ?? product.price ?? 0);
+  const currency = typeof product.currency === 'string' ? product.currency : 'USD';
+  if (!Number.isFinite(value)) return '$0.00';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch (err) {
+    return `$${value.toFixed(2)}`;
+  }
+}
+
+function buildSpecs(product, t) {
+  if (!product) return [];
+  const specs = [];
+  if (product.height != null) specs.push({ label: t('height'), value: `${product.height} cm` });
+  if (product.length != null) specs.push({ label: t('length'), value: `${product.length} cm` });
+  if (product.width != null) specs.push({ label: t('width'), value: `${product.width} cm` });
+  if (product.series) specs.push({ label: 'Series', value: product.series });
+  if (product.rarity) specs.push({ label: 'Rarity', value: product.rarity });
+  if (product.condition) specs.push({ label: 'Condition', value: product.condition });
+  if (product.page_count != null) specs.push({ label: 'Pages', value: product.page_count });
+  if (product.language) specs.push({ label: 'Language', value: product.language });
+  if (product.format) specs.push({ label: 'Format', value: product.format });
+  return specs;
+}
+
+const HERO_FALLBACK_BADGES = ['Collector Series', 'Limited Run', 'Premium Resin'];
+
 function ProductDetailPage() {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [modelUrl, setModelUrl] = useState(null);
-  const { addToCart } = useCart();
-  const [qty, setQty] = useState(1);
-  const { t } = useLanguage();
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  useEffect(() => {
+    return () => {
+      images.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images]);
 
   useEffect(() => {
-    setLoading(true);
-    api
-      .get(`/products/${id}`)
-      .then(async (response) => {
-        setProduct(response.data);
-        const imgs = [];
-        let modelBlobUrl = null;
-        const mediaList = Array.isArray(response.data.media) ? response.data.media : [];
+    if (!modelUrl) return undefined;
+    return () => {
+      URL.revokeObjectURL(modelUrl);
+    };
+  }, [modelUrl]);
+
+  useEffect(() => {
+    let mounted = true;
+    let createdImages = [];
+    let createdModelUrl = null;
+
+    async function loadProduct() {
+      setLoading(true);
+      try {
+        const response = await api.get(`/products/${id}`);
+        if (!mounted) return;
+        const data = response.data;
+        const mediaList = Array.isArray(data.media) ? data.media : [];
+
         for (const media of mediaList) {
-          const kind = media.kind || media.media_type; // backward compat
+          const kind = media.kind || media.media_type;
           if (kind === 'image') {
-            const blob = await getMediaBlob(media.id);
-            imgs.push(URL.createObjectURL(blob));
+            try {
+              const blob = await getMediaBlob(media.id);
+              const objectUrl = URL.createObjectURL(blob);
+              if (!mounted) {
+                URL.revokeObjectURL(objectUrl);
+                continue;
+              }
+              createdImages.push(objectUrl);
+            } catch (err) {
+              console.warn('ProductDetailPage: failed to load image', media?.id, err);
+            }
           }
-          if (kind === 'model' && !modelBlobUrl) {
-            const blob = await getMediaBlob(media.id);
-            modelBlobUrl = URL.createObjectURL(blob);
+          if (kind === 'model' && !createdModelUrl) {
+            try {
+              const blob = await getMediaBlob(media.id);
+              const objectUrl = URL.createObjectURL(blob);
+              if (!mounted) {
+                URL.revokeObjectURL(objectUrl);
+              } else {
+                createdModelUrl = objectUrl;
+              }
+            } catch (err) {
+              console.warn('ProductDetailPage: failed to load model', media?.id, err);
+            }
           }
         }
-        setImages(imgs);
-        setModelUrl(modelBlobUrl);
-      })
-      .catch((error) => console.error('Error fetching product:', error))
-      .finally(() => setLoading(false));
 
-    // Clean up blob URLs on unmount
+        if (!mounted) {
+          createdImages.forEach((url) => URL.revokeObjectURL(url));
+          if (createdModelUrl) URL.revokeObjectURL(createdModelUrl);
+          return;
+        }
+
+        setProduct(data);
+        setImages(createdImages);
+        setModelUrl(createdModelUrl);
+      } catch (error) {
+        if (mounted) console.error('Error fetching product:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadProduct();
+
     return () => {
-      images.forEach(url => URL.revokeObjectURL(url));
-      if (modelUrl) URL.revokeObjectURL(modelUrl);
+      mounted = false;
+      createdImages.forEach((url) => URL.revokeObjectURL(url));
+      if (createdModelUrl) URL.revokeObjectURL(createdModelUrl);
     };
-    // eslint-disable-next-line
   }, [id]);
 
   // Register a product view once per session/id with a small debounce
@@ -67,82 +162,137 @@ function ProductDetailPage() {
     }
     const timer = setTimeout(() => {
       api.post(`/products/${id}/view`).catch(() => {});
-      try { sessionStorage.setItem(key, '1'); } catch (_) {}
-    }, 800); // debounce ~0.8s to avoid quick back/forward double posts
+      try {
+        sessionStorage.setItem(key, '1');
+      } catch (_) {
+        /* ignore */
+      }
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [id]);
 
-  if (loading) return <div className="loading"><ClipLoader /></div>;
+  const specs = useMemo(() => buildSpecs(product, t), [product, t]);
+  const heroBadges = useMemo(() => {
+    const badges = new Set();
+    const typeLabel = product?.product_type || product?.type;
+    if (typeLabel) badges.add(String(typeLabel).toUpperCase());
+    if (product?.series) badges.add(product.series);
+    if (product?.category?.name) badges.add(product.category.name);
+    if (product?.rarity) badges.add(product.rarity);
+    (Array.isArray(product?.tags) ? product.tags : []).forEach((tag) => {
+      if (typeof tag === 'string' && tag.trim()) badges.add(tag.trim());
+    });
+    const list = Array.from(badges);
+    return list.length ? list.slice(0, 4) : HERO_FALLBACK_BADGES;
+  }, [product]);
+  const priceLabel = formatCurrencyValue(product);
+  const description = product?.description || DEFAULT_DESCRIPTION;
+
+  if (loading) {
+    return (
+      <div className="product-detail-page detail-loading">
+        <ClipLoader size={48} />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="product-detail-page detail-loading">
+        <p className="detail-empty">Product unavailable.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="product-detail-page">
       <Helmet>
-        <title>{product ? `${product.name} - 3D Figures Store` : 'Product Details - 3D Figures Store'}</title>
+        <title>{`${product.name} - 3D Figures Store`}</title>
         <meta
           name="description"
-          content={product ? `Purchase ${product.name} and explore its features in detail.` : 'Detailed view of our product.'}
+          content={`Explore ${product.name} in full detail and request a personalised quote.`}
         />
         <link rel="canonical" href={window.location.href} />
       </Helmet>
-      <div className="product-visual">
-        {/* Images displayed as a carousel */}
-        {images.length > 0 && (
-          <div className="product-images">
-            <ImageCarousel images={images} altPrefix={product.name} />
-          </div>
-        )}
-        {/* 3D Viewer */}
-        {modelUrl && (
-          <div className="product-3dviewer">
-            <ThreeDViewer modelUrl={modelUrl} alt={`3D model of ${product.name}`} />
-          </div>
-        )}
-      </div>
-      <div className="product-details">
-        <h2>{product.name}</h2>
-        {(() => {
-          const unit = Number(
-            (product && (product.discounted_price ?? product.price)) ?? 0
-          );
-          return <p className="price">${unit.toFixed(2)}</p>;
-        })()}
-        {product && product.type === '3d' && (
-          <ul className="specs">
-            {product.height != null && <li>{t('height')}: {product.height} cm</li>}
-            {product.length != null && <li>{t('length')}: {product.length} cm</li>}
-            {product.width != null && <li>{t('width')}: {product.width} cm</li>}
-          </ul>
-        )}
-        {product && product.type === 'card' && (
-          <ul className="specs">
-            {product.series && <li>Series: {product.series}</li>}
-            {product.rarity && <li>Rarity: {product.rarity}</li>}
-            {product.condition && <li>Condition: {product.condition}</li>}
-          </ul>
-        )}
-        {product && product.type === 'manual' && (
-          <ul className="specs">
-            {product.page_count != null && <li>Pages: {product.page_count}</li>}
-            {product.language && <li>Language: {product.language}</li>}
-            {product.format && <li>Format: {product.format}</li>}
-          </ul>
-        )}
-        <div style={{ marginTop: 20 }}>
-          <label htmlFor="quantity-input">
-            {t('quantity')}
-            <input
-              id="quantity-input"
-              type="number"
-              min="1"
-              value={qty}
-              onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              style={{ width: 50 }}
-            />
-          </label>
-        <button onClick={() => addToCart(product, qty)}>{t('addToCart')}</button>
+
+      <section className="detail-hero">
+        <div className="detail-hero__badges" aria-hidden={!heroBadges.length}>
+          {heroBadges.map((badge) => (
+            <span key={badge}>{badge}</span>
+          ))}
         </div>
-      </div>
+        <div className="detail-grid">
+          <div className="detail-gallery">
+            {images.length > 0 && (
+              <div className="detail-card detail-card--carousel">
+                <ImageCarousel images={images} altPrefix={product.name} />
+              </div>
+            )}
+            {modelUrl && (
+              <div className="detail-card detail-card--viewer">
+                <ThreeDViewer
+                  modelUrl={modelUrl}
+                  height="min(55vh, 520px)"
+                  style={{ width: '100%' }}
+                  alt={`3D model of ${product.name}`}
+                />
+              </div>
+            )}
+            {!images.length && !modelUrl && (
+              <div className="detail-card detail-card--empty">
+                <p>No media available yet. Reach out for renders and preview shots.</p>
+              </div>
+            )}
+          </div>
+          <aside className="detail-panel">
+            <span className="detail-panel__eyebrow">Collector spotlight</span>
+            <h1>{product.name}</h1>
+            <p className="detail-panel__price">{priceLabel}</p>
+            <p className="detail-panel__description">{description}</p>
+            {specs.length > 0 && (
+              <ul className="detail-specs">
+                {specs.map(({ label, value }) => (
+                  <li key={label}>
+                    <span>{label}</span>
+                    <span>{value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="detail-actions">
+              <button
+                type="button"
+                className="detail-cta detail-cta--primary"
+                onClick={() => setInquiryOpen(true)}
+              >
+                Request a quote
+              </button>
+              <a
+                className="detail-cta detail-cta--ghost"
+                href="https://instagram.com/yourstudio"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Message on Instagram
+              </a>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="detail-info">
+        <div className="detail-info__grid">
+          {INFO_TILES.map((tile) => (
+            <article key={tile.title} className="detail-info__card">
+              <h3>{tile.title}</h3>
+              <p>{tile.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <InquiryModal open={inquiryOpen} onClose={() => setInquiryOpen(false)} product={product} />
     </div>
   );
 }

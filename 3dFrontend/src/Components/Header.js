@@ -4,91 +4,103 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar';
 import '../styles/Header.css';
-import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { isAdmin } from '../utils/authz';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
 function Header() {
-    const { cartItems } = useCart();
-    const { user, logout, loadingUser } = useAuth();
-    const [menuOpen, setMenuOpen] = useState(false);
-    const { toggleTheme, theme } = useTheme();
-    const { t, language, setLanguage } = useLanguage();
+  const { user, logout, loadingUser } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { toggleTheme, theme } = useTheme();
+  const { t, language, setLanguage } = useLanguage();
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="header">
+    <header className={`header ${menuOpen ? 'is-menu-open' : ''}`}>
       <a href="#main-content" className="skip-link">Skip to main content</a>
-      <div className="logo">
-        <Link to="/">YourLogo</Link>
-      </div>
-      <div className="search-area">
-        <SearchBar />
-      </div>
-      <div className="header-controls">
+
+      <div className="header__brand">
         <button
           className="menu-toggle"
           type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
-          aria-label="Toggle navigation menu"
+          aria-label={menuOpen ? t('closeMenu') : t('openMenu')}
           aria-expanded={menuOpen}
           aria-controls="primary-navigation"
         >
-          \u2630
+          <span className="menu-toggle__icon" aria-hidden="true" />
         </button>
-        <nav id="primary-navigation" className={`nav-links${menuOpen ? ' open' : ''}`} aria-label="Main navigation">
+        <div className="logo">
+          <Link to="/" onClick={closeMenu}>YourLogo</Link>
+        </div>
+      </div>
+
+      <div className="header__search">
+        <SearchBar />
+      </div>
+
+      <div className="header__actions">
+        <nav
+          id="primary-navigation"
+          className={`header__nav ${menuOpen ? 'is-open' : ''}`}
+          aria-label="Main navigation"
+        >
           <ul>
             <li>
-              <Link to="/products" onClick={() => setMenuOpen(false)}>{t('products')}</Link>
+              <Link to="/new" onClick={closeMenu}>Showcase</Link>
             </li>
             <li>
-              <Link to="/cart" onClick={() => setMenuOpen(false)}>{`${t('cart')} (${cartItems.length})`}</Link>
+              <Link to="/products" onClick={closeMenu}>{t('products')}</Link>
             </li>
             {user ? (
               <>
-                <li className="user-greet">
+                <li className="header__user">
                   <span>{t('hi')}, {user.email}</span>
                 </li>
                 {!loadingUser && isAdmin(user) && (
                   <li>
-                    <Link to="/admin" onClick={() => setMenuOpen(false)}>Admin</Link>
+                    <Link to="/admin" onClick={closeMenu}>Admin</Link>
                   </li>
                 )}
                 <li>
-                  <button type="button" onClick={() => { setMenuOpen(false); logout(); }}>{t('logout')}</button>
+                  <button type="button" onClick={() => { closeMenu(); logout(); }}>{t('logout')}</button>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                    <Link to="/login" onClick={() => setMenuOpen(false)}>{t('login')}</Link>
+                  <Link to="/login" onClick={closeMenu}>{t('login')}</Link>
                 </li>
                 <li>
-                    <Link to="/register" onClick={() => setMenuOpen(false)}>{t('register')}</Link>
+                  <Link to="/register" onClick={closeMenu}>{t('register')}</Link>
                 </li>
               </>
             )}
           </ul>
         </nav>
-        <select
-          className="language-select"
-          value={language}
-          onChange={(e) => { setLanguage(e.target.value); setMenuOpen(false); }}
-          aria-label="Language"
-        >
-          <option value="en">EN</option>
-          <option value="es">ES</option>
-        </select>
-        <button
-          className="theme-toggle"
-          type="button"
-          onClick={() => { toggleTheme(); setMenuOpen(false); }}
-        >
-          {theme === 'dark' ? t('lightMode') : t('darkMode')}
-        </button>
+
+        <div className="header__utility">
+          <select
+            className="language-select"
+            value={language}
+            onChange={(e) => { setLanguage(e.target.value); closeMenu(); }}
+            aria-label="Language"
+          >
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => { toggleTheme(); closeMenu(); }}
+          >
+            {theme === 'dark' ? t('lightMode') : t('darkMode')}
+          </button>
+        </div>
       </div>
-      </header>
+    </header>
   );
 }
 
