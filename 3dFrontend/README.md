@@ -81,3 +81,9 @@ cache is automatically invalidated after one day.
 
 Click the **Dark Mode** button in the header to switch between light and dark
 themes. The preference is saved in `localStorage` and persists across visits.
+
+### Backend configuration
+
+- Orders now include `currency` and `shipping` fields when posting to `/orders/` or `/guest_orders/`. Guest line items can also send `unit_price` and `currency` to lock pricing; omit them to let the backend price items from the product catalog.
+- If you need a custom order number, include `order_number` in the payload; otherwise the backend will generate one.
+- Seed the admin account via backend env vars `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Set `SECRET_KEY` in the backend to silence startup warnings.

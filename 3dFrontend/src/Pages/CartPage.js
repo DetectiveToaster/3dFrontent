@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import { useCart } from "../context/CartContext";
 import "../styles/CartPage.css";
 import { useLanguage } from '../context/LanguageContext';
+import { deriveCartCurrency, formatCurrency, getUnitPrice } from '../utils/pricing';
 
 function CartPage() {
   const { cartItems, updateCartItem, removeCartItem } = useCart();
@@ -13,10 +14,10 @@ function CartPage() {
   const { t } = useLanguage();
 
   const getProduct = (item) => item.product || item; // fallback for user/guest
+  const currency = deriveCartCurrency(cartItems);
 
   const total = cartItems.reduce((sum, item) => {
-    const prod = getProduct(item);
-    const unit = Number((prod && (prod.discounted_price ?? prod.price)) ?? 0);
+    const unit = getUnitPrice(item);
     return sum + unit * item.quantity;
   }, 0);
 
@@ -57,8 +58,8 @@ function CartPage() {
                       style={{ width: 50 }}
                     />
                   </td>
-                  <td>${Number((prod.discounted_price ?? prod.price) ?? 0).toFixed(2)}</td>
-                  <td>${(Number((prod.discounted_price ?? prod.price) ?? 0) * item.quantity).toFixed(2)}</td>
+                  <td>{formatCurrency(getUnitPrice(item), currency)}</td>
+                  <td>{formatCurrency(getUnitPrice(item) * item.quantity, currency)}</td>
                   <td>
                     <button onClick={() => removeCartItem(item.product_id)}>{t('remove')}</button>
                   </td>
@@ -69,7 +70,7 @@ function CartPage() {
         </table>
       )}
       <div className="cart-summary">
-        <p>{t('total')}: <b>${total.toFixed(2)}</b></p>
+        <p>{t('total')}: <b>{formatCurrency(total, currency)} ({currency})</b></p>
         {cartItems.length > 0 && (
           <button onClick={() => navigate("/checkout")}>{t('proceedCheckout')}</button>
         )}

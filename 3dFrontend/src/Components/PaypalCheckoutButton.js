@@ -5,10 +5,12 @@ import { createGuestOrder, createUserOrder, buildGuestProducts } from '../Servic
 import api from '../Services/api';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
+import { deriveCartCurrency } from '../utils/pricing';
 
 function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
   const { clearCart } = useCart();
   const created = useRef({ orderId: null, paypalOrderId: null });
+  const currency = deriveCartCurrency(cartItems);
 
   const createOrder = async () => {
     try {
@@ -17,13 +19,30 @@ function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
 
       // 1) Create internal order (user vs guest)
       let internalOrder;
+      const shipping = { address: form?.address || user?.address || '' };
       if (user) {
-        internalOrder = await createUserOrder({ userId: user.id, totalCost: total, status: 'PENDING' });
+        internalOrder = await createUserOrder({
+          userId: user.id,
+          totalCost: total,
+          status: 'PENDING',
+          currency,
+          shipping,
+        });
       } else {
         const products = buildGuestProducts(cartItems);
-        internalOrder = await createGuestOrder({ email: form.email, address: form.address, totalCost: total, status: 'PENDING', products });
+        internalOrder = await createGuestOrder({
+          email: form.email,
+          address: form.address,
+          totalCost: total,
+          status: 'PENDING',
+          products,
+          currency,
+          shipping,
+        });
       }
       created.current.orderId = internalOrder.id;
+      created.current.orderNumber = internalOrder.order_number || internalOrder.orderNumber;
+      created.current.currency = internalOrder.currency || currency;
 
       // 2) Create PayPal order from internal order id
       const pp = await createPaypalOrderFromOrderId(internalOrder.id);
@@ -52,7 +71,13 @@ function PaypalCheckoutButton({ user, form, cartItems, total, onSuccess }) {
           clearCart();
         }
         toast.success('Payment successful');
-        if (onSuccess) onSuccess();
+        if (onSuccess) {
+          onSuccess({
+            orderId: created.current.orderId,
+            orderNumber: created.current.orderNumber,
+            currency: created.current.currency || currency,
+          });
+        }
       })
       .catch((err) => {
         console.error('Capture failed', err);

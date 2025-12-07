@@ -17,9 +17,28 @@ function getInitialCart() {
   return saved ? JSON.parse(saved) : [];
 }
 
+function mergeCartItems(items = []) {
+  const map = new Map();
+  items.forEach((item) => {
+    const key = item.product_id ?? item.product?.id;
+    if (!key) return;
+    const existing = map.get(key);
+    if (existing) {
+      map.set(key, {
+        ...existing,
+        quantity: (existing.quantity || 0) + (item.quantity || 0),
+        product: item.product || existing.product,
+      });
+    } else {
+      map.set(key, { ...item, product_id: key });
+    }
+  });
+  return Array.from(map.values());
+}
+
 export function CartProvider({ children }) {
   const { user } = useAuth();
-  const [cartItems, setCartItems] = useState(getInitialCart());
+  const [cartItems, setCartItems] = useState(() => mergeCartItems(getInitialCart()));
 
   // Sync guest cart with localStorage
   useEffect(() => {
@@ -29,9 +48,12 @@ export function CartProvider({ children }) {
   // When user logs in: fetch cart from backend, else use local
   useEffect(() => {
     if (user) {
-      api.get("/cart/").then(res => setCartItems(res.data)).catch(() => setCartItems([]));
+      api
+        .get("/cart/")
+        .then((res) => setCartItems(mergeCartItems(res.data)))
+        .catch(() => setCartItems([]));
     } else {
-      setCartItems(getInitialCart());
+      setCartItems(mergeCartItems(getInitialCart()));
     }
   }, [user]);
 
@@ -39,7 +61,7 @@ export function CartProvider({ children }) {
   const addToCart = async (product, quantity = 1) => {
     if (user) {
       // Backend cart (try update, then add)
-      const existing = cartItems.find(i => i.product_id === product.id);
+      const existing = cartItems.find((i) => i.product_id === product.id);
       if (existing) {
         await api.put(`/cart/${existing.id}`, null, { params: { quantity: existing.quantity + quantity } });
       } else {
@@ -47,22 +69,15 @@ export function CartProvider({ children }) {
       }
       // Refresh cart from backend
       const res = await api.get("/cart/");
-      setCartItems(res.data);
+      setCartItems(mergeCartItems(res.data));
       toast.success("Added to cart");
     } else {
       // Guest cart (localStorage)
-      setCartItems(prev => {
-        const idx = prev.findIndex(i => i.product_id === product.id);
-        let next;
-        if (idx !== -1) {
-          next = [...prev];
-          next[idx].quantity += quantity;
-        } else {
-          next = [...prev, { product_id: product.id, product, quantity }];
-        }
-        localStorage.setItem("guest_cart", JSON.stringify(next));
+      setCartItems((prev) => {
+        const merged = mergeCartItems([...prev, { product_id: product.id, product, quantity }]);
+        localStorage.setItem("guest_cart", JSON.stringify(merged));
         toast.success("Added to cart");
-        return next;
+        return merged;
       });
     }
   };
@@ -74,7 +89,7 @@ export function CartProvider({ children }) {
       if (existing) {
         await api.put(`/cart/${existing.id}`, null, { params: { quantity } });
         const res = await api.get("/cart/");
-        setCartItems(res.data);
+        setCartItems(mergeCartItems(res.data));
         toast.info("Cart updated");
       }
     } else {
@@ -94,7 +109,7 @@ export function CartProvider({ children }) {
       if (existing) {
         await api.delete(`/cart/${existing.id}`);
         const res = await api.get("/cart/");
-        setCartItems(res.data);
+        setCartItems(mergeCartItems(res.data));
         toast.info("Item removed");
       }
     } else {

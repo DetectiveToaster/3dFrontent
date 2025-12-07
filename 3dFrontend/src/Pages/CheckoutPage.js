@@ -10,6 +10,7 @@ import "../styles/CheckoutPage.css";
 import { useLanguage } from '../context/LanguageContext';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { useConsent } from '../context/ConsentContext';
+import { deriveCartCurrency, formatCurrency, getUnitPrice } from '../utils/pricing';
 
 function CheckoutPage() {
   const { user } = useAuth();
@@ -24,14 +25,24 @@ function CheckoutPage() {
   const { t } = useLanguage();
 
   const getProduct = (item) => item.product || item;
+  const currency = deriveCartCurrency(cartItems);
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
   const total = cartItems.reduce((sum, item) => {
-    const prod = getProduct(item);
-    const unit = Number((prod && (prod.discounted_price ?? prod.price)) ?? 0);
+    const unit = getUnitPrice(item);
     return sum + unit * item.quantity;
   }, 0);
+
+  const handleSuccess = (info = {}) => {
+    const orderNumber = info.orderNumber || info.order_id;
+    const currencyCode = info.currency || currency;
+    const parts = [`${t('paymentSuccess')}${currencyCode ? ` (${currencyCode})` : ''}`];
+    if (orderNumber) {
+      parts.push(`Order #: ${orderNumber}`);
+    }
+    setStatus(parts.join(' • '));
+  };
 
   return (
     <div className="checkout-page">
@@ -63,14 +74,16 @@ function CheckoutPage() {
           <ul>
             {cartItems.map((item) => {
               const prod = getProduct(item);
+              const unitPrice = getUnitPrice(item);
+              const lineTotal = unitPrice * item.quantity;
               return (
                 <li key={item.product_id}>
-                  {prod.name} x {item.quantity} (${(Number((prod.discounted_price ?? prod.price) ?? 0) * item.quantity).toFixed(2)})
+                  {prod.name} x {item.quantity} ({formatCurrency(lineTotal, currency)})
                 </li>
               );
             })}
           </ul>
-          <p><b>{t('total')}: ${total.toFixed(2)}</b></p>
+          <p><b>{t('total')}: {formatCurrency(total, currency)} ({currency})</b></p>
         </div>
         <div className="payment-method">
           <label>
@@ -103,7 +116,7 @@ function CheckoutPage() {
               form={form}
               cartItems={cartItems}
               total={total}
-              onSuccess={() => setStatus(t('paymentSuccess'))}
+              onSuccess={handleSuccess}
             />
           </PayPalScriptProvider>
         ) : (
@@ -112,7 +125,7 @@ function CheckoutPage() {
             form={form}
             cartItems={cartItems}
             total={total}
-            onSuccess={() => setStatus(t('paymentSuccess'))}
+            onSuccess={handleSuccess}
           />
         )}
         {!allow('functional') && method !== 'paypal' && (

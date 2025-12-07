@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import api from '../Services/api';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
+import { deriveCartCurrency, getUnitPrice } from '../utils/pricing';
 
 function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
   const { clearCart } = useCart();
@@ -9,6 +10,7 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useLanguage();
+  const currency = deriveCartCurrency(cartItems);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,8 +27,12 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         products: cartItems.map((i) => ({
           product_id: i.product_id,
           quantity: i.quantity,
+          unit_price: getUnitPrice(i),
+          currency,
         })),
         card,
+        currency,
+        shipping: { address: form.address || user?.address || '' },
       };
       if (user) {
         payload.user_id = user.id;
@@ -35,9 +41,15 @@ function CreditCardCheckoutForm({ user, form, cartItems, total, onSuccess }) {
         payload.guest_email = form.email;
         payload.guest_address = form.address;
       }
-      await api.post('/payments/charge-card', payload);
+      const res = await api.post('/payments/charge-card', payload);
+      const data = res?.data || {};
       clearCart();
-      if (onSuccess) onSuccess();
+      if (onSuccess) {
+        onSuccess({
+          currency,
+          orderNumber: data.order_number || data.orderNumber,
+        });
+      }
     } catch (err) {
       setError(t('paymentFailed'));
     } finally {

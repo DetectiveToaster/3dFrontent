@@ -89,3 +89,16 @@ If omitted, it defaults to `http://localhost:8000`.
    ID. The PayPal integration falls back to the sandbox `test` ID if this
    variable is not provided.
 
+## Backend and environment notes
+
+- The backend now seeds an admin user from `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Set these in your backend environment so the dashboard at `/admin` has credentials.
+- Define `SECRET_KEY` in the backend environment to remove startup warnings.
+- Order creation endpoints expect `currency` and `shipping` fields in both `/orders/` and `/guest_orders/` payloads. Guest line items can include `unit_price` and `currency` to lock in pricing; otherwise the backend will price with live product data.
+- If you need custom order numbers, pass `order_number` in the payload; the backend will auto-generate one when it is omitted.
+
+## Arch Linux tips
+
+- Node 18+ is recommended; install via `nvm` or your package manager (`sudo pacman -S nodejs npm`).
+- No Windows-specific paths are used; the project is case-sensitive-friendly and runs with the standard CRA scripts (`npm start`, `npm test`, `npm run build`).
+- If you see missing OpenGL/WebGL support when previewing 3D models, ensure GPU drivers are installed (e.g., `mesa` and your vendor driver packages).
+
