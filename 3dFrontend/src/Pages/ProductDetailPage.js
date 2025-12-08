@@ -12,6 +12,7 @@ import '../styles/ProductDetailPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { useLanguage } from '../context/LanguageContext';
 import { sortMediaList } from '../utils/media';
+import { SHOWCASE_MODE } from '../config/showcase';
 
 const DEFAULT_DESCRIPTION = 'Message us to customise paint finishes, scale, and presentation packaging.';
 const INFO_TILES = [
@@ -249,7 +250,7 @@ function ProductDetailPage() {
           <aside className="detail-panel">
             <span className="detail-panel__eyebrow">Collector spotlight</span>
             <h1>{product.name}</h1>
-            <p className="detail-panel__price">{priceLabel}</p>
+            {!SHOWCASE_MODE && <p className="detail-panel__price">{priceLabel}</p>}
             <p className="detail-panel__description">{description}</p>
             {specs.length > 0 && (
               <ul className="detail-specs">

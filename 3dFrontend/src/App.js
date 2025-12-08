@@ -15,7 +15,6 @@ import AdminDashboard from './Pages/AdminDashboard';
 import RequireAdmin from './Components/RequireAdmin';
 import Header from './Components/Header';
 import Footer from './Components/Footer';
-import ShowcaseApp from './ShowcaseApp';
 import './styles/AppLayout.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -38,7 +37,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/new/*" element={<ShowcaseApp />} />
         <Route element={<DefaultLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/products" element={<ProductListPage />} />

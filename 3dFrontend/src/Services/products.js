@@ -77,28 +77,35 @@ export async function createProductMediaJSON({ product_id, kind, filename, conte
   return res.data;
 }
 
-// Upload sessions
+// Upload sessions (admin-only)
 export async function createUploadSession() {
-  const res = await api.post('/product_media/upload-sessions/');
+  // Preferred admin endpoint
+  const res = await api.post('/admin/uploads');
   return res.data;
 }
 
-export async function uploadFileToSession({ sessionId, file, kind }) {
+export async function uploadFileToSession({ sessionId, file, kind, role, sort_order }) {
   const form = new FormData();
   form.append('file', file);
   if (kind) form.append('kind', kind);
-  const res = await api.post(`/product_media/upload-sessions/${sessionId}/files`, form);
+  if (role) form.append('role', role);
+  if (sort_order !== undefined && sort_order !== null) form.append('sort_order', sort_order);
+  const res = await api.post(`/admin/uploads/${sessionId}/files`, form);
   return res.data;
 }
 
 export async function listUploadSessionFiles(sessionId) {
-  const res = await api.get(`/product_media/upload-sessions/${sessionId}`);
+  const res = await api.get(`/admin/uploads/${sessionId}/files`);
   return res.data;
 }
 
-export async function attachUploadToProduct({ upload_id, product_id, role, sort_order, kind }) {
-  const body = { upload_id, product_id, role, sort_order, kind };
-  const res = await api.post('/product_media/attach', body);
+export async function commitUploadSession({ sessionId, items }) {
+  const res = await api.post(`/admin/uploads/${sessionId}/commit`, { items });
+  return res.data;
+}
+
+export async function deleteUploadSession(sessionId) {
+  const res = await api.delete(`/admin/uploads/${sessionId}`);
   return res.data;
 }
 

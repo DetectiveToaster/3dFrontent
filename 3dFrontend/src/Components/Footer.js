@@ -16,7 +16,7 @@ function Footer() {
         <a href="https://youtube.com/@yourstudio" target="_blank" rel="noopener noreferrer">
           YouTube
         </a>
-        <a href="mailto:sales@yourbrand.com">
+        <a href="mailto:theeastereggstore@gmail.com">
           Email
         </a>
       </div>

@@ -102,3 +102,7 @@ If omitted, it defaults to `http://localhost:8000`.
 - No Windows-specific paths are used; the project is case-sensitive-friendly and runs with the standard CRA scripts (`npm start`, `npm test`, `npm run build`).
 - If you see missing OpenGL/WebGL support when previewing 3D models, ensure GPU drivers are installed (e.g., `mesa` and your vendor driver packages).
 
+## Showcase-only mode
+
+`src/config/showcase.js` sets `SHOWCASE_MODE = true` to disable pricing/cart/checkout and route inquiries to `theeastereggstore@gmail.com`. In this mode product cards/details hide prices and checkout/cart pages display contact instructions instead of payment flows.
+

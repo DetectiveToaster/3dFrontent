@@ -8,6 +8,7 @@ import '../styles/LandingPage.css';
 import { useLanguage } from '../context/LanguageContext';
 import api from '../Services/api';
 import { getMediaBlob } from '../Services/mediaCache';
+import { SHOWCASE_MODE } from '../config/showcase';
 
 function LandingPage() {
   const { t } = useLanguage();
@@ -80,13 +81,6 @@ function LandingPage() {
       highlightedShowcase.forEach(({ modelUrl }) => URL.revokeObjectURL(modelUrl));
     };
   }, [highlightedShowcase]);
-
-  const formatPrice = (product) => {
-    const unit = Number(
-      (product && (product.discounted_price ?? product.price)) ?? 0
-    );
-    return `$${unit.toFixed(2)}`;
-  };
 
   const highlightedCount = highlighted.length;
   const showcaseCount = highlightedShowcase.length;
@@ -163,7 +157,9 @@ function LandingPage() {
                     <Link to={`/products/${product.id}`} className="landing-featured__link">
                       {product.name}
                     </Link>
-                    <span className="landing-featured__price">{formatPrice(product)}</span>
+                    {!SHOWCASE_MODE && (
+                      <span className="landing-featured__price">View details</span>
+                    )}
                   </div>
                 </article>
               ))}

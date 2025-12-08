@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { X, Send } from 'lucide-react';
 import '../styles/InquiryModal.css';
+import { CONTACT_EMAIL } from '../config/showcase';
 
-const DEFAULT_EMAIL = 'sales@yourbrand.com';
+const DEFAULT_EMAIL = CONTACT_EMAIL;
 
 function buildPrefillMessage(product) {
   if (product && product.name) {

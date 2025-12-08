@@ -6,6 +6,7 @@ import '../styles/ProductCard.css';
 import { getMediaBlob } from '../Services/mediaCache';
 import ThreeDViewer, { preloadModel } from './ThreeDViewer';
 import { pickMediaByRole, sortMediaList } from '../utils/media';
+import { SHOWCASE_MODE } from '../config/showcase';
 
 function formatPrice(product) {
   const value = Number((product && (product.discounted_price ?? product.price)) ?? 0);
@@ -171,7 +172,7 @@ function ProductCard({ product }) {
         </div>
         <footer className="product-card__meta">
           <span className="product-card__name">{product?.name}</span>
-          <span className="product-card__price">{priceLabel}</span>
+          {!SHOWCASE_MODE && <span className="product-card__price">{priceLabel}</span>}
         </footer>
       </Link>
     </article>

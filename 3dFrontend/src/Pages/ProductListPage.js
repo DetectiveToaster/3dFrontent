@@ -8,6 +8,7 @@ import ProductGrid from '../Components/ProductGrid';
 import '../styles/ProductListPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { useLanguage } from '../context/LanguageContext';
+import { SHOWCASE_MODE } from '../config/showcase';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -92,10 +93,6 @@ function ProductListPage() {
     if (!Array.isArray(products)) return [];
     const items = [...products];
     switch (sort) {
-      case 'price-asc':
-        return items.sort((a, b) => getNumericPrice(a) - getNumericPrice(b));
-      case 'price-desc':
-        return items.sort((a, b) => getNumericPrice(b) - getNumericPrice(a));
       case 'alpha':
         return items.sort((a, b) => {
           const nameA = (a?.name || '').toLowerCase();
@@ -202,15 +199,17 @@ function ProductListPage() {
             )}
           </div>
           <div className="catalog-toolbar__controls">
-            <label htmlFor="sort-select">
-              Sort
-              <select id="sort-select" value={sort} onChange={changeSort}>
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="alpha">Name A-Z</option>
-              </select>
-            </label>
+            {!SHOWCASE_MODE && (
+              <label htmlFor="sort-select">
+                Sort
+                <select id="sort-select" value={sort} onChange={changeSort}>
+                  <option value="featured">Featured</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="alpha">Name A-Z</option>
+                </select>
+              </label>
+            )}
             <label htmlFor="limit-select">
               Per page
               <select id="limit-select" value={String(limit)} onChange={changeLimit}>
@@ -247,5 +246,3 @@ function ProductListPage() {
 }
 
 export default ProductListPage;
-
-

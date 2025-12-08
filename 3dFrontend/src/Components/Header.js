@@ -49,9 +49,6 @@ function Header() {
         >
           <ul>
             <li>
-              <Link to="/new" onClick={closeMenu}>Showcase</Link>
-            </li>
-            <li>
               <Link to="/products" onClick={closeMenu}>{t('products')}</Link>
             </li>
             {user ? (

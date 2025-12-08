@@ -13,7 +13,8 @@ import {
   createUploadSession,
   uploadFileToSession,
   listUploadSessionFiles,
-  attachUploadToProduct,
+  commitUploadSession,
+  deleteUploadSession,
 } from '../Services/products';
 import '../styles/Admin.css';
 
@@ -170,10 +171,10 @@ function AdminDashboard() {
   };
 
   const ensureUploadSession = async () => {
-    if (uploadSession?.id || uploadSession?.session_id) return uploadSession;
+    if (uploadSession?.id || uploadSession?.upload_id) return uploadSession;
     const session = await createUploadSession();
     setUploadSession(session);
-    toast.success(`Upload session created (${session?.id || session?.session_id})`);
+    toast.success(`Upload session created (${session?.id || session?.upload_id})`);
     return session;
   };
 
@@ -187,9 +188,11 @@ function AdminDashboard() {
 
   const normalizeUpload = (res, file) => {
     const upload_id = res?.upload_id || res?.id || res?.file_id;
+    const file_id = res?.file_id || res?.id || upload_id;
     return {
       upload_id,
       id: upload_id,
+      file_id,
       filename: res?.filename || file?.name || `upload-${upload_id}`,
       kind: res?.kind || res?.media_type || detectKind(file),
       content_type: res?.content_type || file?.type,
@@ -206,7 +209,7 @@ function AdminDashboard() {
     setUploading(true);
     try {
       const session = await ensureUploadSession();
-      const sessionId = session?.id || session?.session_id;
+      const sessionId = session?.id || session?.upload_id;
       const uploads = [];
       for (const f of files) {
         try {
@@ -250,7 +253,7 @@ function AdminDashboard() {
       return;
     }
     try {
-      const sessionId = uploadSession?.id || uploadSession?.session_id;
+      const sessionId = uploadSession?.id || uploadSession?.upload_id;
       const res = await listUploadSessionFiles(sessionId);
       const files = Array.isArray(res?.files) ? res.files : Array.isArray(res) ? res : [];
       const normalized = files.map((f) => normalizeUpload(f));
@@ -277,17 +280,22 @@ function AdminDashboard() {
     }
     try {
       const payload = {
-        upload_id: upload.upload_id,
+        file_id: upload.file_id || upload.upload_id || upload.id,
         product_id: pid,
         kind: mapping.kind || upload.kind,
         role: mapping.role,
         sort_order: mapping.sort_order === '' ? null : Number(mapping.sort_order ?? 0),
       };
-      const res = await attachUploadToProduct(payload);
+      const sessionId = uploadSession?.id || uploadSession?.upload_id;
+      await commitUploadSession({ sessionId, items: [payload] });
       toast.success(`Attached upload #${upload.upload_id} to product #${pid}`);
-      if (res?.id) {
-        setSessionFiles((prev) => prev.map((f) => (f.upload_id === upload.upload_id ? { ...f, product_id: pid, sort_order: payload.sort_order, role: payload.role } : f)));
-      }
+      setSessionFiles((prev) =>
+        prev.map((f) =>
+          f.upload_id === upload.upload_id
+            ? { ...f, product_id: pid, sort_order: payload.sort_order, role: payload.role }
+            : f
+        )
+      );
     } catch (err) {
       console.error(err);
       toast.error('Failed to attach upload');
