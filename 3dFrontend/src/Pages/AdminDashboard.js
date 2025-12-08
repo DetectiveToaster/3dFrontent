@@ -4,16 +4,18 @@ import {
   create3DProduct,
   createCardProduct,
   createManualProduct,
-  uploadProductMedia,
   listProductMedia,
   deleteProductMedia,
   getAllProducts,
   setProductVisibility,
   updateProductPrice,
   applyProductDiscount,
+  createUploadSession,
+  uploadFileToSession,
+  listUploadSessionFiles,
+  attachUploadToProduct,
 } from '../Services/products';
 import '../styles/Admin.css';
-import ThreeDViewer from '../Components/ThreeDViewer';
 
 function AdminDashboard() {
   const [type, setType] = useState('3d');
@@ -21,6 +23,7 @@ function AdminDashboard() {
     name: '', quantity: 1, price: 0,
     discount: '', discounted_price: '',
     is_visible: true,
+    status: 'published',
     height: '', length: '', width: '', // 3d
     series: '', rarity: '', condition: '', // card
     page_count: '', language: '', format: '', // manual
@@ -28,10 +31,11 @@ function AdminDashboard() {
   const [createdProduct, setCreatedProduct] = useState(null);
 
   const [mediaProductId, setMediaProductId] = useState('');
-  const [mediaType, setMediaType] = useState('image');
-  const [file, setFile] = useState(null);
   const [mediaList, setMediaList] = useState([]);
-  const [modelPreviewUrl, setModelPreviewUrl] = useState(null);
+  const [uploadSession, setUploadSession] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [sessionFiles, setSessionFiles] = useState([]);
+  const [fileMappings, setFileMappings] = useState({});
 
   const [adminProducts, setAdminProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -40,8 +44,6 @@ function AdminDashboard() {
 
   useEffect(() => {
     refreshProducts();
-    // cleanup preview URL on unmount
-    return () => { if (modelPreviewUrl) URL.revokeObjectURL(modelPreviewUrl); };
     // eslint-disable-next-line
   }, []);
 
@@ -74,6 +76,7 @@ function AdminDashboard() {
         discount: productForm.discount === '' ? undefined : Number(productForm.discount),
         discounted_price: productForm.discounted_price === '' ? undefined : Number(productForm.discounted_price),
         is_visible: !!productForm.is_visible,
+        status: productForm.status || 'published',
       };
       if (type === '3d') {
         data = await create3DProduct({
@@ -106,21 +109,6 @@ function AdminDashboard() {
     }
   };
 
-  const submitMedia = async (e) => {
-    e.preventDefault();
-    try {
-      const pid = Number(mediaProductId || (createdProduct && createdProduct.id));
-      if (!pid) { toast.warn('Provide product ID'); return; }
-      if (!file) { toast.warn('Choose a file'); return; }
-      const res = await uploadProductMedia({ product_id: pid, media_type: mediaType, file });
-      toast.success(`Uploaded media #${res.id}`);
-      if (modelPreviewUrl) { URL.revokeObjectURL(modelPreviewUrl); setModelPreviewUrl(null); }
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to upload media');
-    }
-  };
-
   const fetchMedia = async () => {
     try {
       const pid = Number(mediaProductId || (createdProduct && createdProduct.id));
@@ -146,18 +134,6 @@ function AdminDashboard() {
     }
   };
 
-
-  const onFileChange = (e) => {
-    const f = e.target.files && e.target.files[0];
-    setFile(f || null);
-    if (f && mediaType === 'model') {
-      if (modelPreviewUrl) URL.revokeObjectURL(modelPreviewUrl);
-      const url = URL.createObjectURL(f);
-      setModelPreviewUrl(url);
-    } else {
-      if (modelPreviewUrl) { URL.revokeObjectURL(modelPreviewUrl); setModelPreviewUrl(null); }
-    }
-  };
 
   const toggleVisibility = async (p) => {
     try {
@@ -190,6 +166,131 @@ function AdminDashboard() {
     } catch (e) {
       console.error(e);
       toast.error('Failed to apply discount');
+    }
+  };
+
+  const ensureUploadSession = async () => {
+    if (uploadSession?.id || uploadSession?.session_id) return uploadSession;
+    const session = await createUploadSession();
+    setUploadSession(session);
+    toast.success(`Upload session created (${session?.id || session?.session_id})`);
+    return session;
+  };
+
+  const detectKind = (file) => {
+    const name = typeof file === 'string' ? file : file?.name || '';
+    const ext = name.split('.').pop()?.toLowerCase();
+    if (ext === 'glb' || ext === 'gltf') return 'model';
+    if (ext === 'pdf') return 'pdf';
+    return 'image';
+  };
+
+  const normalizeUpload = (res, file) => {
+    const upload_id = res?.upload_id || res?.id || res?.file_id;
+    return {
+      upload_id,
+      id: upload_id,
+      filename: res?.filename || file?.name || `upload-${upload_id}`,
+      kind: res?.kind || res?.media_type || detectKind(file),
+      content_type: res?.content_type || file?.type,
+      size: res?.size || file?.size,
+      role: res?.role,
+      sort_order: res?.sort_order,
+      product_id: res?.product_id,
+    };
+  };
+
+  const handleFilesUpload = async (incomingFiles) => {
+    const files = Array.from(incomingFiles || []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const session = await ensureUploadSession();
+      const sessionId = session?.id || session?.session_id;
+      const uploads = [];
+      for (const f of files) {
+        try {
+          const res = await uploadFileToSession({ sessionId, file: f, kind: detectKind(f) });
+          uploads.push(normalizeUpload(res, f));
+        } catch (err) {
+          console.error('Upload failed', err);
+          toast.error(`Failed to upload ${f?.name || 'file'}`);
+        }
+      }
+      if (uploads.length) {
+        setSessionFiles((prev) => {
+          const merged = [...prev];
+          uploads.forEach((u) => {
+            const idx = merged.findIndex((m) => m.upload_id === u.upload_id);
+            if (idx >= 0) merged[idx] = { ...merged[idx], ...u };
+            else merged.push(u);
+          });
+          return merged;
+        });
+        const defaultProductId = Number(mediaProductId || createdProduct?.id || '') || '';
+        const mappingUpdates = {};
+        uploads.forEach((u) => {
+          mappingUpdates[u.upload_id] = {
+            product_id: defaultProductId,
+            role: u.role || (u.kind === 'image' ? 'gallery' : u.kind === 'model' ? 'model' : 'document'),
+            kind: u.kind,
+            sort_order: u.sort_order ?? 0,
+          };
+        });
+        setFileMappings((prev) => ({ ...mappingUpdates, ...prev }));
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const refreshSessionFiles = async () => {
+    if (!uploadSession) {
+      toast.warn('Create an upload session first');
+      return;
+    }
+    try {
+      const sessionId = uploadSession?.id || uploadSession?.session_id;
+      const res = await listUploadSessionFiles(sessionId);
+      const files = Array.isArray(res?.files) ? res.files : Array.isArray(res) ? res : [];
+      const normalized = files.map((f) => normalizeUpload(f));
+      setSessionFiles(normalized);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load session files');
+    }
+  };
+
+  const updateMapping = (uploadId, partial) => {
+    setFileMappings((prev) => ({
+      ...prev,
+      [uploadId]: { ...(prev[uploadId] || {}), ...partial },
+    }));
+  };
+
+  const attachUpload = async (upload) => {
+    const mapping = fileMappings[upload.upload_id] || {};
+    const pid = Number(mapping.product_id || mediaProductId || createdProduct?.id || '');
+    if (!pid) {
+      toast.warn('Provide product ID before attaching');
+      return;
+    }
+    try {
+      const payload = {
+        upload_id: upload.upload_id,
+        product_id: pid,
+        kind: mapping.kind || upload.kind,
+        role: mapping.role,
+        sort_order: mapping.sort_order === '' ? null : Number(mapping.sort_order ?? 0),
+      };
+      const res = await attachUploadToProduct(payload);
+      toast.success(`Attached upload #${upload.upload_id} to product #${pid}`);
+      if (res?.id) {
+        setSessionFiles((prev) => prev.map((f) => (f.upload_id === upload.upload_id ? { ...f, product_id: pid, sort_order: payload.sort_order, role: payload.role } : f)));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to attach upload');
     }
   };
 
@@ -276,6 +377,12 @@ function AdminDashboard() {
             <label style={{ alignItems: 'center', display: 'flex', gap: '0.5rem' }}>
               <input type="checkbox" checked={!!productForm.is_visible} onChange={e => setProductForm(prev => ({ ...prev, is_visible: e.target.checked }))} /> Visible
             </label>
+            <label>Status
+              <select name="status" value={productForm.status} onChange={onChange}>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </label>
           </div>
 
           {TypeFields}
@@ -291,34 +398,88 @@ function AdminDashboard() {
 
       <section className="card">
         <h2>Upload Media</h2>
-        <form onSubmit={submitMedia} className="form">
-          <div className="row">
-            <label>Product ID
-              <input value={mediaProductId} onChange={e => setMediaProductId(e.target.value)} placeholder={createdProduct ? String(createdProduct.id) : ''} />
-            </label>
-            <label>Media Type
-              <select value={mediaType} onChange={e => setMediaType(e.target.value)}>
-                <option value="image">Image</option>
-                <option value="model">Model</option>
-                <option value="pdf">PDF</option>
-              </select>
-            </label>
-          </div>
-          <div className="row">
-            <label>File
-              <input type="file" accept={mediaType === 'model' ? '.glb,.gltf,model/*' : undefined} onChange={onFileChange} />
-            </label>
-          </div>
-          {mediaType === 'model' && modelPreviewUrl && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <p className="muted">3D Preview (not uploaded yet):</p>
-              <ThreeDViewer modelUrl={modelPreviewUrl} style={{ maxWidth: '600px', height: '420px' }} alt="Model preview" />
-            </div>
+        <p className="muted">Create a session, drop multiple files, then attach each upload to a product with role and sort order.</p>
+        <div className="row">
+          <button type="button" onClick={ensureUploadSession} className="primary">Create session</button>
+          {uploadSession && (
+            <span className="muted">Session: {uploadSession.id || uploadSession.session_id}</span>
           )}
-          <div className="actions">
-            <button type="submit" className="primary">Upload</button>
+          <button type="button" onClick={refreshSessionFiles}>Refresh session</button>
+          <label>Default Product ID
+            <input value={mediaProductId} onChange={e => setMediaProductId(e.target.value)} placeholder={createdProduct ? String(createdProduct.id) : ''} />
+          </label>
+        </div>
+        <div
+          className="upload-dropzone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); handleFilesUpload(e.dataTransfer.files); }}
+        >
+          <input
+            type="file"
+            multiple
+            onChange={(e) => handleFilesUpload(e.target.files)}
+            aria-label="Upload files"
+          />
+          <p>{uploading ? 'Uploading…' : 'Drag & drop files here or click to browse'}</p>
+        </div>
+
+        {sessionFiles.length > 0 ? (
+          <div className="upload-table">
+            <div className="upload-header">
+              <span>File</span>
+              <span>Kind</span>
+              <span>Role</span>
+              <span>Sort</span>
+              <span>Product</span>
+              <span>Action</span>
+            </div>
+            {sessionFiles.map((f) => {
+              const mapping = fileMappings[f.upload_id] || {};
+              return (
+                <div className="upload-row" key={f.upload_id}>
+                  <span>
+                    <code>#{f.upload_id}</code> {f.filename}
+                    <br />
+                    <span className="muted">{f.content_type || 'unknown'}</span>
+                  </span>
+                  <select
+                    value={mapping.kind || f.kind || 'image'}
+                    onChange={(e) => updateMapping(f.upload_id, { kind: e.target.value })}
+                  >
+                    <option value="image">Image</option>
+                    <option value="model">Model</option>
+                    <option value="pdf">PDF</option>
+                  </select>
+                  <select
+                    value={mapping.role || f.role || ''}
+                    onChange={(e) => updateMapping(f.upload_id, { role: e.target.value })}
+                  >
+                    <option value="">(none)</option>
+                    <option value="thumbnail">Thumbnail</option>
+                    <option value="gallery">Gallery</option>
+                    <option value="model">Model</option>
+                    <option value="document">Document</option>
+                  </select>
+                  <input
+                    type="number"
+                    value={mapping.sort_order ?? f.sort_order ?? 0}
+                    onChange={(e) => updateMapping(f.upload_id, { sort_order: e.target.value })}
+                    style={{ width: 70 }}
+                  />
+                  <input
+                    type="number"
+                    value={mapping.product_id ?? mediaProductId ?? createdProduct?.id ?? ''}
+                    onChange={(e) => updateMapping(f.upload_id, { product_id: e.target.value })}
+                    style={{ width: 110 }}
+                  />
+                  <button type="button" onClick={() => attachUpload(f)}>Attach</button>
+                </div>
+              );
+            })}
           </div>
-        </form>
+        ) : (
+          <p className="muted">No uploads yet. Create a session and drop files to begin.</p>
+        )}
       </section>
 
       <section className="card">
@@ -335,7 +496,9 @@ function AdminDashboard() {
           <ul className="media-list">
             {mediaList.map(m => (
               <li key={m.id}>
-                <code>#{m.id}</code> {m.kind || m.media_type} - {m.filename} <span className="muted">({m.content_type})</span>
+                <code>#{m.id}</code> {m.kind || m.media_type} - {m.filename} <span className="muted">({m.content_type || 'unknown'})</span>
+                {m.role && <span className="badge" style={{ marginLeft: 6 }}>{m.role}</span>}
+                {m.sort_order != null && <span className="muted" style={{ marginLeft: 6 }}>sort: {m.sort_order}</span>}
                 <button type="button" onClick={() => removeMedia(m.id)} style={{ marginLeft: 8 }}>Remove</button>
               </li>
             ))}
@@ -368,6 +531,7 @@ function AdminDashboard() {
             <div className="row header" role="row">
               <div role="columnheader">ID</div>
               <div role="columnheader">Name</div>
+              <div role="columnheader">Status</div>
               <div role="columnheader">Visible</div>
               <div role="columnheader">Price</div>
               <div role="columnheader">Discounted</div>
@@ -381,6 +545,9 @@ function AdminDashboard() {
               <div className={`row ${p.is_visible ? '' : 'hidden'}`} role="row" key={p.id}>
                 <div role="cell">{p.id}</div>
                 <div role="cell">{p.name} {p.is_visible ? <span className="badge visible">Visible</span> : <span className="badge hidden">Hidden</span>}</div>
+                <div role="cell">
+                  <span className="badge">{p.status || 'published'}</span>
+                </div>
                 <div role="cell">
                   <button type="button" onClick={() => toggleVisibility(p)}>
                     {p.is_visible ? 'Hide' : 'Show'}
@@ -453,6 +620,3 @@ function DiscountEditor({ product, onApply }) {
 }
 
 export default AdminDashboard;
-
-
-

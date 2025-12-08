@@ -13,6 +13,7 @@ export async function create3DProduct(payload) {
     length: payload.length,
     width: payload.width,
     is_visible: payload.is_visible,
+    status: payload.status,
   };
   const res = await api.post('/products/3d', body);
   return res.data;
@@ -30,6 +31,7 @@ export async function createCardProduct(payload) {
     rarity: payload.rarity,
     condition: payload.condition,
     is_visible: payload.is_visible,
+    status: payload.status,
   };
   const res = await api.post('/products/card', body);
   return res.data;
@@ -47,6 +49,7 @@ export async function createManualProduct(payload) {
     language: payload.language,
     format: payload.format,
     is_visible: payload.is_visible,
+    status: payload.status,
   };
   const res = await api.post('/products/manual', body);
   return res.data;
@@ -71,6 +74,31 @@ export async function createProductMediaJSON({ product_id, kind, filename, conte
   const body = { product_id, kind, filename, content_type };
   if (role) body.role = role;
   const res = await api.post('/product_media/', body);
+  return res.data;
+}
+
+// Upload sessions
+export async function createUploadSession() {
+  const res = await api.post('/product_media/upload-sessions/');
+  return res.data;
+}
+
+export async function uploadFileToSession({ sessionId, file, kind }) {
+  const form = new FormData();
+  form.append('file', file);
+  if (kind) form.append('kind', kind);
+  const res = await api.post(`/product_media/upload-sessions/${sessionId}/files`, form);
+  return res.data;
+}
+
+export async function listUploadSessionFiles(sessionId) {
+  const res = await api.get(`/product_media/upload-sessions/${sessionId}`);
+  return res.data;
+}
+
+export async function attachUploadToProduct({ upload_id, product_id, role, sort_order, kind }) {
+  const body = { upload_id, product_id, role, sort_order, kind };
+  const res = await api.post('/product_media/attach', body);
   return res.data;
 }
 

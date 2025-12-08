@@ -11,6 +11,7 @@ import InquiryModal from '../Components/InquiryModal';
 import '../styles/ProductDetailPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { useLanguage } from '../context/LanguageContext';
+import { sortMediaList } from '../utils/media';
 
 const DEFAULT_DESCRIPTION = 'Message us to customise paint finishes, scale, and presentation packaging.';
 const INFO_TILES = [
@@ -94,7 +95,7 @@ function ProductDetailPage() {
         const response = await api.get(`/products/${id}`);
         if (!mounted) return;
         const data = response.data;
-        const mediaList = Array.isArray(data.media) ? data.media : [];
+        const mediaList = sortMediaList(Array.isArray(data.media) ? data.media : []);
 
         for (const media of mediaList) {
           const kind = media.kind || media.media_type;

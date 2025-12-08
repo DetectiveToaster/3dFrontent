@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import '../styles/ProductCard.css';
 import { getMediaBlob } from '../Services/mediaCache';
 import ThreeDViewer, { preloadModel } from './ThreeDViewer';
+import { pickMediaByRole, sortMediaList } from '../utils/media';
 
 function formatPrice(product) {
   const value = Number((product && (product.discounted_price ?? product.price)) ?? 0);
@@ -29,16 +30,16 @@ function ProductCard({ product }) {
   const productPath = productId ? `/products/${productId}` : '/products';
 
   const mediaList = useMemo(
-    () => (product && Array.isArray(product.media) ? product.media : []),
+    () => sortMediaList(product && Array.isArray(product.media) ? product.media : []),
     [product]
   );
 
   const imageMedia = useMemo(
-    () => mediaList.find((m) => (m.kind || m.media_type) === 'image'),
+    () => pickMediaByRole(mediaList, 'image'),
     [mediaList]
   );
   const modelMedia = useMemo(
-    () => mediaList.find((m) => (m.kind || m.media_type) === 'model'),
+    () => pickMediaByRole(mediaList, 'model'),
     [mediaList]
   );
 
