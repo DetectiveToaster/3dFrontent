@@ -1,61 +1,18 @@
 import api from './api';
-import { deriveCartCurrency, getItemCurrency, getUnitPrice } from '../utils/pricing';
 
-export async function createUserOrder({
-  userId,
-  totalCost,
-  status = 'PENDING',
-  currency,
-  shipping,
-  orderNumber,
-}) {
-  const payload = {
-    total_cost: totalCost,
-    status,
-    currency,
-    shipping: shipping || null,
-  };
-  if (userId) payload.user_id = userId;
-  if (orderNumber) payload.order_number = orderNumber;
+export async function createUserOrder(payload) {
   const res = await api.post('/orders/', payload);
-  return res.data; // expects { id, ... }
+  return res.data;
 }
 
-export async function createGuestOrder({
-  email,
-  address,
-  totalCost,
-  status = 'PENDING',
-  products,
-  currency,
-  shipping,
-  orderNumber,
-}) {
-  const payload = {
-    guest_email: email,
-    guest_address: address,
-    total_cost: totalCost,
-    status,
-    products: products.map((p) => ({
-      product_id: p.product_id,
-      quantity: p.quantity,
-      unit_price: p.unit_price,
-      currency: p.currency || currency,
-    })),
-    currency,
-    shipping: shipping || null,
-  };
-  if (orderNumber) payload.order_number = orderNumber;
+export async function createGuestOrder(payload) {
   const res = await api.post('/guest_orders/', payload);
-  return res.data; // expects { id, ... }
+  return res.data;
 }
 
-export function buildGuestProducts(cartItems) {
-  const currency = deriveCartCurrency(cartItems);
+export function buildOrderProducts(cartItems) {
   return cartItems.map((item) => ({
-    product_id: item.product_id,
-    quantity: item.quantity,
-    unit_price: getUnitPrice(item),
-    currency: getItemCurrency(item, currency),
+    product_id: item.product_id ?? item.product?.id ?? item.id,
+    quantity: Number(item.quantity || 1),
   }));
 }

@@ -123,12 +123,17 @@ export function CartProvider({ children }) {
   };
 
   // Clear cart
-  const clearCart = () => {
-    if (!user) {
+  const clearCart = async () => {
+    if (user) {
+      const deletes = cartItems
+        .filter((item) => item.id)
+        .map((item) => api.delete(`/cart/${item.id}`));
+      await Promise.allSettled(deletes);
+      setCartItems([]);
+    } else {
       setCartItems([]);
       localStorage.removeItem("guest_cart");
     }
-    // for users, handled after order placed
     toast.info("Cart cleared");
   };
 

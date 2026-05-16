@@ -6,6 +6,7 @@ import ProductListPage from './Pages/ProductListPage';
 import ProductDetailPage from './Pages/ProductDetailPage';
 import CartPage from './Pages/CartPage';
 import CheckoutPage from './Pages/CheckoutPage';
+import CheckoutConfirmationPage from './Pages/CheckoutConfirmationPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
 import NotFoundPage from './Pages/NotFoundPage';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout/confirmation" element={<CheckoutConfirmationPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ConsentProvider } from './context/ConsentContext';
 
 // Mock CSS from react-toastify to avoid Jest errors
 jest.mock('react-toastify/dist/ReactToastify.css', () => {});
@@ -21,7 +22,9 @@ test('displays landing page heading', () => {
         <ThemeProvider>
           <AuthProvider>
             <CartProvider>
-              <App />
+              <ConsentProvider>
+                <App />
+              </ConsentProvider>
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

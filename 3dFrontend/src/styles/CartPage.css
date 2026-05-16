@@ -46,6 +46,25 @@
   background: var(--color-accent-hover);
 }
 
+.cart-actions {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.cart-actions .checkout-link {
+  background: var(--color-accent);
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 18px;
+  text-decoration: none;
+}
+
+.cart-actions .checkout-link:hover {
+  background: var(--color-accent-hover);
+}
+
 .cart-summary {
   text-align: right;
   margin-bottom: 16px;

@@ -1,8 +1,21 @@
 import api from './api';
 
+function addFulfillmentFields(body, payload) {
+  return {
+    ...body,
+    production_type: payload.production_type,
+    material: payload.material,
+    color: payload.color,
+    scale: payload.scale,
+    estimated_production_days: payload.estimated_production_days,
+    requires_manual_review: payload.requires_manual_review,
+    weight_grams: payload.weight_grams,
+  };
+}
+
 // Create products by type per new API
 export async function create3DProduct(payload) {
-  const body = {
+  const body = addFulfillmentFields({
     name: payload.name,
     product_type: '3d',
     quantity: payload.quantity,
@@ -14,13 +27,13 @@ export async function create3DProduct(payload) {
     width: payload.width,
     is_visible: payload.is_visible,
     status: payload.status,
-  };
+  }, payload);
   const res = await api.post('/products/3d', body);
   return res.data;
 }
 
 export async function createCardProduct(payload) {
-  const body = {
+  const body = addFulfillmentFields({
     name: payload.name,
     product_type: 'card',
     quantity: payload.quantity,
@@ -32,13 +45,13 @@ export async function createCardProduct(payload) {
     condition: payload.condition,
     is_visible: payload.is_visible,
     status: payload.status,
-  };
+  }, payload);
   const res = await api.post('/products/card', body);
   return res.data;
 }
 
 export async function createManualProduct(payload) {
-  const body = {
+  const body = addFulfillmentFields({
     name: payload.name,
     product_type: 'manual',
     quantity: payload.quantity,
@@ -50,7 +63,7 @@ export async function createManualProduct(payload) {
     format: payload.format,
     is_visible: payload.is_visible,
     status: payload.status,
-  };
+  }, payload);
   const res = await api.post('/products/manual', body);
   return res.data;
 }

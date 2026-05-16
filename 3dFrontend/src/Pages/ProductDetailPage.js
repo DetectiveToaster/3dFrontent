@@ -11,7 +11,7 @@ import InquiryModal from '../Components/InquiryModal';
 import '../styles/ProductDetailPage.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { useLanguage } from '../context/LanguageContext';
-import { sortMediaList } from '../utils/media';
+import { detectBlobModelFormat, detectMediaModelFormat, sortMediaList } from '../utils/media';
 import { SHOWCASE_MODE } from '../config/showcase';
 
 const DEFAULT_DESCRIPTION = 'Message us to customise paint finishes, scale, and presentation packaging.';
@@ -71,6 +71,7 @@ function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [modelUrl, setModelUrl] = useState(null);
+  const [modelMedia, setModelMedia] = useState(null);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   useEffect(() => {
     return () => {
@@ -89,6 +90,7 @@ function ProductDetailPage() {
     let mounted = true;
     let createdImages = [];
     let createdModelUrl = null;
+    let createdModelMedia = null;
 
     async function loadProduct() {
       setLoading(true);
@@ -116,11 +118,13 @@ function ProductDetailPage() {
           if (kind === 'model' && !createdModelUrl) {
             try {
               const blob = await getMediaBlob(media.id);
+              const detectedFormat = await detectBlobModelFormat(blob, media);
               const objectUrl = URL.createObjectURL(blob);
               if (!mounted) {
                 URL.revokeObjectURL(objectUrl);
               } else {
                 createdModelUrl = objectUrl;
+                createdModelMedia = { ...media, model_format: detectedFormat };
               }
             } catch (err) {
               console.warn('ProductDetailPage: failed to load model', media?.id, err);
@@ -137,6 +141,7 @@ function ProductDetailPage() {
         setProduct(data);
         setImages(createdImages);
         setModelUrl(createdModelUrl);
+        setModelMedia(createdModelMedia);
       } catch (error) {
         if (mounted) console.error('Error fetching product:', error);
       } finally {
@@ -190,6 +195,7 @@ function ProductDetailPage() {
   }, [product]);
   const priceLabel = formatCurrencyValue(product);
   const description = product?.description || DEFAULT_DESCRIPTION;
+  const modelFormat = detectMediaModelFormat(modelMedia);
 
   if (loading) {
     return (
@@ -235,6 +241,9 @@ function ProductDetailPage() {
               <div className="detail-card detail-card--viewer">
                 <ThreeDViewer
                   modelUrl={modelUrl}
+                  modelFormat={modelFormat}
+                  modelFilename={modelMedia?.filename}
+                  modelContentType={modelMedia?.content_type}
                   height="min(55vh, 520px)"
                   style={{ width: '100%' }}
                   alt={`3D model of ${product.name}`}

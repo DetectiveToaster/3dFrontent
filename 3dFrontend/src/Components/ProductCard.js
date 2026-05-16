@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import '../styles/ProductCard.css';
 import { getMediaBlob } from '../Services/mediaCache';
 import ThreeDViewer, { preloadModel } from './ThreeDViewer';
-import { pickMediaByRole, sortMediaList } from '../utils/media';
+import { detectBlobModelFormat, detectMediaModelFormat, pickMediaByRole, sortMediaList } from '../utils/media';
 import { SHOWCASE_MODE } from '../config/showcase';
 
 function formatPrice(product) {
@@ -46,9 +46,11 @@ function ProductCard({ product }) {
 
   const [imageUrl, setImageUrl] = useState(null);
   const [modelUrl, setModelUrl] = useState(null);
+  const [loadedModelFormat, setLoadedModelFormat] = useState(null);
   const [hasHover, setHasHover] = useState(false);
   const [loadingModel, setLoadingModel] = useState(false);
   const [modelError, setModelError] = useState(false);
+  const modelFormat = detectMediaModelFormat(modelMedia);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,8 +94,9 @@ function ProductCard({ product }) {
     try {
       const blob = await getMediaBlob(modelMedia.id);
       const url = URL.createObjectURL(blob);
+      const detectedFormat = await detectBlobModelFormat(blob, modelMedia);
       try {
-        await preloadModel(url);
+        await preloadModel(url, detectedFormat);
       } catch (preloadErr) {
         console.warn('ProductCard: model preloading failed', productId, preloadErr);
       }
@@ -103,6 +106,7 @@ function ProductCard({ product }) {
         }
         return url;
       });
+      setLoadedModelFormat(detectedFormat);
       setModelError(false);
     } catch (error) {
       console.warn('ProductCard: failed to load model', productId, error);
@@ -117,6 +121,7 @@ function ProductCard({ product }) {
       if (modelUrl) {
         URL.revokeObjectURL(modelUrl);
       }
+      setLoadedModelFormat(null);
     },
     [modelUrl]
   );
@@ -132,6 +137,7 @@ function ProductCard({ product }) {
 
   const priceLabel = formatPrice(product);
   const showViewer = hasHover && modelUrl && !modelError;
+  const viewerModelFormat = loadedModelFormat || modelFormat;
 
   return (
     <article className={`product-card${modelMedia ? ' product-card--has-model' : ''}`}>
@@ -149,6 +155,9 @@ function ProductCard({ product }) {
               <ThreeDViewer
                 className="three-d-viewer--compact"
                 modelUrl={modelUrl}
+                modelFormat={viewerModelFormat}
+                modelFilename={modelMedia?.filename}
+                modelContentType={modelMedia?.content_type}
                 height="100%"
                 style={{ minHeight: '100%' }}
                 alt={`3D preview of ${product?.name ?? 'product'}`}

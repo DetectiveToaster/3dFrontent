@@ -9,6 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../Services/api';
 import { getMediaBlob } from '../Services/mediaCache';
 import { SHOWCASE_MODE } from '../config/showcase';
+import { detectBlobModelFormat, detectMediaModelFormat, sortMediaList } from '../utils/media';
 
 function LandingPage() {
   const { t } = useLanguage();
@@ -44,7 +45,7 @@ function LandingPage() {
       const models = [];
 
       for (const product of highlighted) {
-        const mediaList = Array.isArray(product.media) ? product.media : [];
+        const mediaList = sortMediaList(Array.isArray(product.media) ? product.media : []);
         const modelMedia = mediaList.find(
           (m) => (m.kind || m.media_type) === 'model'
         );
@@ -52,8 +53,9 @@ function LandingPage() {
 
         try {
           const blob = await getMediaBlob(modelMedia.id);
+          const detectedFormat = await detectBlobModelFormat(blob, modelMedia);
           const url = URL.createObjectURL(blob);
-          models.push({ product, modelUrl: url });
+          models.push({ product, modelUrl: url, modelMedia: { ...modelMedia, model_format: detectedFormat } });
           if (models.length === 3) break;
         } catch (err) {
           console.warn('LandingPage: failed to load model', product?.id, err);
@@ -144,11 +146,14 @@ function LandingPage() {
         ) : highlightedShowcase.length > 0 ? (
           <>
             <div className="landing-featured__grid">
-              {highlightedShowcase.map(({ product, modelUrl }) => (
+              {highlightedShowcase.map(({ product, modelUrl, modelMedia }) => (
                 <article key={product.id} className="landing-featured__card">
                   <div className="landing-featured__viewer">
                     <ThreeDViewer
                       modelUrl={modelUrl}
+                      modelFormat={detectMediaModelFormat(modelMedia)}
+                      modelFilename={modelMedia?.filename}
+                      modelContentType={modelMedia?.content_type}
                       style={{ width: '100%', height: '360px' }}
                       alt={`3D model of ${product.name}`}
                     />

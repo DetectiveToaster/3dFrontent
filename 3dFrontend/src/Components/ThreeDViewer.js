@@ -1,10 +1,12 @@
 // src/components/ThreeDViewer.js
 
-import React, { Suspense, useMemo, useEffect, useState } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import React, { Suspense, useMemo, useEffect, useRef, useState } from 'react';
+import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html, Center } from '@react-three/drei';
-import { Box3, Vector3, MathUtils } from 'three';
+import { Box3, Vector3, MathUtils, MeshStandardMaterial } from 'three';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
 import '../styles/ThreeDViewer.css';
+import { detectModelFormat } from '../utils/media';
 
 class ModelErrorBoundary extends React.Component {
   constructor(props) {
@@ -28,17 +30,21 @@ class ModelErrorBoundary extends React.Component {
   }
 }
 
-function Model({ url, onFramed }) {
-  const gltf = useGLTF(url, true); // true = useDraco (if model is compressed)
-  const scene = useMemo(() => gltf.scene.clone(), [gltf.scene]);
-
+function useFrameObject(object, onFramed) {
   useEffect(() => {
-    if (!onFramed) return undefined;
-    const box = new Box3().setFromObject(scene);
+    if (!onFramed || !object) return undefined;
+    const box = new Box3().setFromObject(object);
     const size = box.getSize(new Vector3());
     onFramed({ size });
     return () => onFramed(null);
-  }, [scene, onFramed]);
+  }, [object, onFramed]);
+}
+
+function GLTFModel({ url, onFramed }) {
+  const gltf = useGLTF(url, true); // true = useDraco (if model is compressed)
+  const scene = useMemo(() => gltf.scene.clone(), [gltf.scene]);
+
+  useFrameObject(scene, onFramed);
 
   useEffect(
     () => () => {
@@ -52,6 +58,52 @@ function Model({ url, onFramed }) {
       <primitive object={scene} />
     </Center>
   );
+}
+
+function STLModel({ url, onFramed }) {
+  const loadedGeometry = useLoader(STLLoader, url);
+  const geometry = useMemo(() => {
+    const next = loadedGeometry.clone();
+    if (!next.attributes.normal) {
+      next.computeVertexNormals();
+    }
+    return next;
+  }, [loadedGeometry]);
+  const material = useMemo(
+    () =>
+      new MeshStandardMaterial({
+        color: '#c9c9c9',
+        roughness: 0.58,
+        metalness: 0.08,
+      }),
+    []
+  );
+
+  useEffect(() => () => material.dispose(), [material]);
+  useEffect(() => () => geometry?.dispose?.(), [geometry]);
+
+  const meshRef = useRef(null);
+
+  useEffect(() => {
+    if (!onFramed || !meshRef.current) return undefined;
+    const box = new Box3().setFromObject(meshRef.current);
+    const size = box.getSize(new Vector3());
+    onFramed({ size });
+    return () => onFramed(null);
+  }, [geometry, onFramed]);
+
+  return (
+    <Center>
+      <mesh ref={meshRef} geometry={geometry} material={material} />
+    </Center>
+  );
+}
+
+function Model({ url, format, onFramed }) {
+  if (format === 'stl') {
+    return <STLModel url={url} onFramed={onFramed} />;
+  }
+  return <GLTFModel url={url} onFramed={onFramed} />;
 }
 
 function CameraFrame({ frameData }) {
@@ -90,6 +142,9 @@ function CameraFrame({ frameData }) {
 
 function ThreeDViewer({
   modelUrl,
+  modelFormat,
+  modelFilename,
+  modelContentType,
   style = {},
   alt,
   height = 'min(55vh, 520px)',
@@ -103,6 +158,12 @@ function ThreeDViewer({
   }, [modelUrl]);
 
   if (!modelUrl) return <div style={{ color: 'gray' }}>No 3D model available.</div>;
+
+  const resolvedFormat = detectModelFormat({
+    filename: modelFilename,
+    contentType: modelContentType,
+    format: modelFormat,
+  });
 
   const resolvedHeight =
     typeof height === 'number' ? `${height}px` : height;
@@ -137,7 +198,7 @@ function ThreeDViewer({
           fallback={<Html center><div className="error">Failed to load 3D model.</div></Html>}
         >
           <Suspense fallback={<Html center><div>Loading 3D Model...</div></Html>}>
-            <Model url={modelUrl} onFramed={setFrameData} />
+            <Model url={modelUrl} format={resolvedFormat} onFramed={setFrameData} />
           </Suspense>
         </ModelErrorBoundary>
         <CameraFrame frameData={frameData} />
@@ -148,7 +209,8 @@ function ThreeDViewer({
   );
 }
 
-export function preloadModel(url) {
+export function preloadModel(url, format) {
+  if (format === 'stl') return Promise.resolve();
   return useGLTF.preload(url);
 }
 

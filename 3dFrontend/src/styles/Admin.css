@@ -4,7 +4,7 @@
 .admin-page .card { border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: var(--color-background); }
 .admin-page .form .row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .admin-page label { display: flex; flex-direction: column; font-size: 0.95rem; }
-.admin-page input, .admin-page select { padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); }
+.admin-page input, .admin-page select, .admin-page textarea { padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); font: inherit; }
 .admin-page .actions { display: flex; gap: 8px; margin-top: 8px; }
 .admin-page button { padding: 0.4rem 0.75rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); cursor: pointer; }
 .admin-page button:hover { background: var(--color-surface); border-color: var(--color-primary); color: var(--color-primary); }
@@ -28,6 +28,9 @@
 .admin-page .badge.hidden { background: #ffeae6; color: #a53; border-color: #f3b2a4; }
 .admin-page .badge.visible { background: #e9f7ef; color: #1b5; border-color: #bfe7cf; }
 
+.admin-page .field-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 12px; }
+.admin-page .checkbox-label { align-items: center; flex-direction: row; gap: 8px; justify-content: flex-start; }
+
 /* Upload dropzone */
 .upload-dropzone { border: 2px dashed var(--color-border); padding: 1rem; border-radius: 10px; text-align: center; margin: 0.5rem 0 1rem; cursor: pointer; background: var(--color-surface, rgba(0,0,0,0.02)); }
 .upload-dropzone:hover { border-color: var(--color-primary); color: var(--color-primary); }
@@ -36,3 +39,16 @@
 .upload-header, .upload-row { display: contents; }
 .upload-header span { font-weight: 700; }
 .upload-row { border-bottom: 1px dashed var(--color-border-muted); }
+
+.orders-table { display: grid; gap: 8px; }
+.orders-table .order-row { align-items: stretch; display: grid; gap: 8px; grid-template-columns: 120px minmax(130px, 1fr) 145px 145px 150px minmax(150px, 1fr) minmax(210px, 1.4fr); padding: 8px 0; border-bottom: 1px dashed var(--color-border-muted); }
+.orders-table .order-header { font-weight: 700; border-bottom: 1px solid var(--color-border); }
+.orders-table .order-row > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.orders-table textarea { min-height: 76px; resize: vertical; }
+.orders-table .stacked-inputs { gap: 6px; }
+.orders-table .order-actions { align-content: start; display: grid; gap: 6px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 1100px) {
+  .orders-table .order-row { grid-template-columns: 1fr; }
+  .orders-table .order-header { display: none; }
+}

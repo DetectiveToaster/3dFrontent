@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   create3DProduct,
@@ -16,7 +16,31 @@ import {
   commitUploadSession,
   deleteUploadSession,
 } from '../Services/products';
+import {
+  cancelOrder,
+  listAdminOrders,
+  markOrderPaid,
+  markOrderPaymentReceived,
+  markOrderReady,
+  markOrderShipped,
+  moveOrderToProduction,
+  updateAdminOrder,
+} from '../Services/adminOrders';
+import { formatCurrency } from '../utils/pricing';
 import '../styles/Admin.css';
+
+const ORDER_STATUSES = [
+  'AWAITING_PAYMENT',
+  'PAYMENT_RECEIVED',
+  'IN_PRODUCTION',
+  'READY',
+  'SHIPPED',
+  'COMPLETED',
+  'CANCELLED',
+  'EXPIRED',
+];
+
+const PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED', 'REFUNDED'];
 
 function AdminDashboard() {
   const [type, setType] = useState('3d');
@@ -25,6 +49,13 @@ function AdminDashboard() {
     discount: '', discounted_price: '',
     is_visible: true,
     status: 'published',
+    production_type: 'in_stock',
+    material: '',
+    color: '',
+    scale: '',
+    estimated_production_days: '',
+    requires_manual_review: false,
+    weight_grams: '',
     height: '', length: '', width: '', // 3d
     series: '', rarity: '', condition: '', // card
     page_count: '', language: '', format: '', // manual
@@ -42,11 +73,50 @@ function AdminDashboard() {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [filterVisibility, setFilterVisibility] = useState('all'); // all|visible|hidden
   const [search, setSearch] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [orderStatusFilter, setOrderStatusFilter] = useState('');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [orderDrafts, setOrderDrafts] = useState({});
+
+  const refreshOrders = useCallback(async () => {
+    try {
+      setLoadingOrders(true);
+      const params = { limit: 25 };
+      if (orderStatusFilter) params.status = orderStatusFilter;
+      if (paymentStatusFilter) params.payment_status = paymentStatusFilter;
+      const data = await listAdminOrders(params);
+      const list = Array.isArray(data) ? data : data?.items || [];
+      setOrders(list);
+      setOrderDrafts((prev) => {
+        const next = { ...prev };
+        list.forEach((order) => {
+          if (!next[order.id]) {
+            next[order.id] = {
+              admin_notes: order.admin_notes || '',
+              tracking_number: order.tracking_number || '',
+              shipping_carrier: order.shipping_carrier || '',
+            };
+          }
+        });
+        return next;
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to load orders');
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, [orderStatusFilter, paymentStatusFilter]);
 
   useEffect(() => {
     refreshProducts();
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    refreshOrders();
+  }, [refreshOrders]);
 
   const refreshProducts = async () => {
     try {
@@ -61,10 +131,10 @@ function AdminDashboard() {
     }
   };
 
-  const onChange = (e) => {
+  const onChange = useCallback((e) => {
     const { name, value } = e.target;
     setProductForm(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   const submitProduct = async (e) => {
     e.preventDefault();
@@ -78,6 +148,13 @@ function AdminDashboard() {
         discounted_price: productForm.discounted_price === '' ? undefined : Number(productForm.discounted_price),
         is_visible: !!productForm.is_visible,
         status: productForm.status || 'published',
+        production_type: productForm.production_type || 'in_stock',
+        material: productForm.material || undefined,
+        color: productForm.color || undefined,
+        scale: productForm.scale || undefined,
+        estimated_production_days: productForm.estimated_production_days === '' ? undefined : Number(productForm.estimated_production_days),
+        requires_manual_review: !!productForm.requires_manual_review,
+        weight_grams: productForm.weight_grams === '' ? undefined : Number(productForm.weight_grams),
       };
       if (type === '3d') {
         data = await create3DProduct({
@@ -170,6 +247,78 @@ function AdminDashboard() {
     }
   };
 
+  const updateOrderDraft = (orderId, partial) => {
+    setOrderDrafts((prev) => ({
+      ...prev,
+      [orderId]: { ...(prev[orderId] || {}), ...partial },
+    }));
+  };
+
+  const getOrderDraft = (order) => orderDrafts[order.id] || {
+    admin_notes: order.admin_notes || '',
+    tracking_number: order.tracking_number || '',
+    shipping_carrier: order.shipping_carrier || '',
+  };
+
+  const runOrderAction = async (label, action) => {
+    try {
+      await action();
+      toast.success(label);
+      await refreshOrders();
+    } catch (err) {
+      console.error(err);
+      toast.error('Order update failed');
+    }
+  };
+
+  const saveOrderAdminFields = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Updated order ${order.order_number || order.id}`, () => updateAdminOrder(order.id, {
+      admin_notes: draft.admin_notes || undefined,
+      tracking_number: draft.tracking_number || undefined,
+      shipping_carrier: draft.shipping_carrier || undefined,
+    }));
+  };
+
+  const markPaymentReceived = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Payment received for ${order.order_number || order.id}`, () =>
+      markOrderPaymentReceived(order.id, { admin_notes: draft.admin_notes || undefined })
+    );
+  };
+
+  const moveToProduction = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Moved ${order.order_number || order.id} to production`, () =>
+      moveOrderToProduction(order.id, { admin_notes: draft.admin_notes || undefined })
+    );
+  };
+
+  const markReady = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Marked ${order.order_number || order.id} ready`, () =>
+      markOrderReady(order.id, { admin_notes: draft.admin_notes || undefined })
+    );
+  };
+
+  const markShipped = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Marked ${order.order_number || order.id} shipped`, () =>
+      markOrderShipped(order.id, {
+        admin_notes: draft.admin_notes || undefined,
+        tracking_number: draft.tracking_number || undefined,
+        shipping_carrier: draft.shipping_carrier || undefined,
+      })
+    );
+  };
+
+  const cancelAdminOrder = (order) => {
+    const draft = getOrderDraft(order);
+    return runOrderAction(`Cancelled ${order.order_number || order.id}`, () =>
+      cancelOrder(order.id, { admin_notes: draft.admin_notes || undefined })
+    );
+  };
+
   const ensureUploadSession = async () => {
     if (uploadSession?.id || uploadSession?.upload_id) return uploadSession;
     const session = await createUploadSession();
@@ -178,10 +327,25 @@ function AdminDashboard() {
     return session;
   };
 
+  const discardUploadSession = async () => {
+    if (!uploadSession) return;
+    try {
+      const sessionId = uploadSession?.id || uploadSession?.upload_id;
+      await deleteUploadSession(sessionId);
+      setUploadSession(null);
+      setSessionFiles([]);
+      setFileMappings({});
+      toast.success('Upload session deleted');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete upload session');
+    }
+  };
+
   const detectKind = (file) => {
     const name = typeof file === 'string' ? file : file?.name || '';
     const ext = name.split('.').pop()?.toLowerCase();
-    if (ext === 'glb' || ext === 'gltf') return 'model';
+    if (ext === 'glb' || ext === 'gltf' || ext === 'stl') return 'model';
     if (ext === 'pdf') return 'pdf';
     return 'image';
   };
@@ -393,6 +557,35 @@ function AdminDashboard() {
             </label>
           </div>
 
+          <div className="field-grid">
+            <label>Production Type
+              <select name="production_type" value={productForm.production_type} onChange={onChange}>
+                <option value="in_stock">In stock</option>
+                <option value="made_to_order">Made to order</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>Material
+              <input name="material" value={productForm.material} onChange={onChange} />
+            </label>
+            <label>Color
+              <input name="color" value={productForm.color} onChange={onChange} />
+            </label>
+            <label>Scale
+              <input name="scale" value={productForm.scale} onChange={onChange} />
+            </label>
+            <label>Production Days
+              <input name="estimated_production_days" type="number" min="0" value={productForm.estimated_production_days} onChange={onChange} />
+            </label>
+            <label>Weight (g)
+              <input name="weight_grams" type="number" min="0" step="1" value={productForm.weight_grams} onChange={onChange} />
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" checked={!!productForm.requires_manual_review} onChange={e => setProductForm(prev => ({ ...prev, requires_manual_review: e.target.checked }))} />
+              Manual review
+            </label>
+          </div>
+
           {TypeFields}
 
           <div className="actions">
@@ -413,6 +606,7 @@ function AdminDashboard() {
             <span className="muted">Session: {uploadSession.id || uploadSession.session_id}</span>
           )}
           <button type="button" onClick={refreshSessionFiles}>Refresh session</button>
+          <button type="button" onClick={discardUploadSession} disabled={!uploadSession}>Delete session</button>
           <label>Default Product ID
             <input value={mediaProductId} onChange={e => setMediaProductId(e.target.value)} placeholder={createdProduct ? String(createdProduct.id) : ''} />
           </label>
@@ -425,6 +619,7 @@ function AdminDashboard() {
           <input
             type="file"
             multiple
+            accept="image/*,.glb,.gltf,.stl,.pdf,model/*,application/pdf"
             onChange={(e) => handleFilesUpload(e.target.files)}
             aria-label="Upload files"
           />
@@ -513,6 +708,99 @@ function AdminDashboard() {
           </ul>
         ) : (
           <p className="muted">No media loaded.</p>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Manage Orders</h2>
+        <div className="row" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <label>Status
+            <select value={orderStatusFilter} onChange={(e) => setOrderStatusFilter(e.target.value)}>
+              <option value="">All</option>
+              {ORDER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </label>
+          <label>Payment
+            <select value={paymentStatusFilter} onChange={(e) => setPaymentStatusFilter(e.target.value)}>
+              <option value="">All</option>
+              {PAYMENT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </label>
+          <button type="button" onClick={refreshOrders}>Reload</button>
+        </div>
+        {loadingOrders ? (
+          <p className="muted">Loading orders</p>
+        ) : orders.length > 0 ? (
+          <div className="orders-table" role="table" aria-label="Orders">
+            <div className="order-row order-header" role="row">
+              <div role="columnheader">Order</div>
+              <div role="columnheader">Customer</div>
+              <div role="columnheader">Status</div>
+              <div role="columnheader">Totals</div>
+              <div role="columnheader">Tracking</div>
+              <div role="columnheader">Admin</div>
+              <div role="columnheader">Actions</div>
+            </div>
+            {orders.map((order) => {
+              const draft = getOrderDraft(order);
+              return (
+                <div className="order-row" role="row" key={order.id}>
+                  <div role="cell">
+                    <strong>{order.order_number || `#${order.id}`}</strong>
+                    <span className="muted">#{order.id}</span>
+                  </div>
+                  <div role="cell">
+                    <span>{order.guest_email || order.user?.email || `User #${order.user_id || '-'}`}</span>
+                    {order.phone && <span className="muted">{order.phone}</span>}
+                  </div>
+                  <div role="cell">
+                    <span className="badge">{order.status || 'AWAITING_PAYMENT'}</span>
+                    <span className="badge">{order.payment_status || 'PENDING'}</span>
+                    <span className="muted">{order.payment_method || 'manual'}</span>
+                  </div>
+                  <div role="cell">
+                    <span>Subtotal {formatCurrency(order.subtotal, order.currency || 'EUR')}</span>
+                    <span>Ship {formatCurrency(order.shipping_cost, order.currency || 'EUR')}</span>
+                    <strong>Total {formatCurrency(order.total_cost, order.currency || 'EUR')}</strong>
+                  </div>
+                  <div role="cell" className="stacked-inputs">
+                    <input
+                      value={draft.shipping_carrier}
+                      onChange={(e) => updateOrderDraft(order.id, { shipping_carrier: e.target.value })}
+                      placeholder="Carrier"
+                      aria-label={`Carrier for ${order.order_number || order.id}`}
+                    />
+                    <input
+                      value={draft.tracking_number}
+                      onChange={(e) => updateOrderDraft(order.id, { tracking_number: e.target.value })}
+                      placeholder="Tracking"
+                      aria-label={`Tracking for ${order.order_number || order.id}`}
+                    />
+                  </div>
+                  <div role="cell">
+                    <textarea
+                      value={draft.admin_notes}
+                      onChange={(e) => updateOrderDraft(order.id, { admin_notes: e.target.value })}
+                      placeholder="Admin notes"
+                      rows="3"
+                      aria-label={`Admin notes for ${order.order_number || order.id}`}
+                    />
+                  </div>
+                  <div role="cell" className="order-actions">
+                    <button type="button" onClick={() => saveOrderAdminFields(order)}>Save fields</button>
+                    <button type="button" onClick={() => runOrderAction(`Marked ${order.order_number || order.id} paid`, () => markOrderPaid(order.id))}>Mark paid</button>
+                    <button type="button" onClick={() => markPaymentReceived(order)}>Payment received</button>
+                    <button type="button" onClick={() => moveToProduction(order)}>Production</button>
+                    <button type="button" onClick={() => markReady(order)}>Ready</button>
+                    <button type="button" onClick={() => markShipped(order)}>Shipped</button>
+                    <button type="button" onClick={() => cancelAdminOrder(order)}>Cancel</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="muted">No orders found.</p>
         )}
       </section>
 
